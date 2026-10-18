@@ -30,18 +30,19 @@ function Escaner() {
   const [manual, setManual] = useState("");
 
   function procesar(numero: string) {
-    const enCentral = getState().decimos.filter((d) => d.numero === numero && d.ubicacion === CENTRAL);
+    const d = getState().decimos.find((x) => x.numero === numero && x.ubicacion === CENTRAL);
     if (modo === "entrada") {
-      if (enCentral.length) { actions.sumar(enCentral[0].id, cant); toast.success(`${numero}: +${cant} décimos`); }
+      if (d) { actions.sumar(d.id, cant); toast.success(`${numero}: +${cant} décimos`); }
       else setAlta({ numero, serie: "", fraccion: "", cantidad: cant });
+    } else if (!d) {
+      toast.error(`${numero} no está en stock de la Administración`);
     } else {
-      if (!enCentral.length) return toast.error(`${numero} no está en stock de la Administración`);
-      actions.restar(enCentral[0].id, 1); toast.success(`${numero}: vendido 1 décimo`);
+      actions.restar(d.id, 1); toast.success(`${numero}: vendido 1 décimo`);
     }
   }
   function onScan(code: string) {
     const n = extraerNumero(code);
-    if (!n) return toast.error("Código no válido");
+    if (!n) { toast.error("Código no válido"); return; }
     if (!alta) procesar(n);
   }
 
