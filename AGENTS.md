@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Shared team data lives in Lovable Cloud tables (decimos, locales, albaranes) via src/lib/store.ts with realtime reload; access requires sign-in (signup disabled, any signed-in user sees all data) because it is an internal tool.
