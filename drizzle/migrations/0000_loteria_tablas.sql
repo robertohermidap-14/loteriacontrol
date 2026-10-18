@@ -1,0 +1,12 @@
+CREATE TABLE public.locales (id text PRIMARY KEY, nombre text NOT NULL, direccion text NOT NULL DEFAULT '', telefono text NOT NULL DEFAULT '', created_at timestamptz NOT NULL DEFAULT now());
+CREATE TABLE public.decimos (id text PRIMARY KEY, numero text NOT NULL, serie text NOT NULL DEFAULT '', fraccion text NOT NULL DEFAULT '', cantidad integer NOT NULL DEFAULT 0, ubicacion text NOT NULL DEFAULT 'central', created_at timestamptz NOT NULL DEFAULT now());
+CREATE TABLE public.albaranes (id text PRIMARY KEY, local_id text NOT NULL, fecha timestamptz NOT NULL DEFAULT now(), lineas jsonb NOT NULL DEFAULT '[]', estado text NOT NULL DEFAULT 'pendiente', total numeric NOT NULL DEFAULT 0, fecha_pago timestamptz);
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.locales, public.decimos, public.albaranes TO authenticated;
+GRANT ALL ON public.locales, public.decimos, public.albaranes TO service_role;
+ALTER TABLE public.locales ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.decimos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.albaranes ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "equipo" ON public.locales FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "equipo" ON public.decimos FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "equipo" ON public.albaranes FOR ALL TO authenticated USING (true) WITH CHECK (true);
+ALTER PUBLICATION supabase_realtime ADD TABLE public.locales, public.decimos, public.albaranes;
