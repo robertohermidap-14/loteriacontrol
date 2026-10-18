@@ -7,7 +7,7 @@ export const PRECIO_DECIMO = 20;
 export type Decimo = { id: string; numero: string; serie: string; fraccion: string; cantidad: number; ubicacion: string };
 export type Local = { id: string; nombre: string; direccion: string; telefono: string };
 export type Linea = { numero: string; serie: string; fraccion: string; cantidad: number; devueltos: number; pagados: number };
-export type Albaran = { id: string; localId: string; fecha: string; lineas: Linea[]; estado: "pendiente" | "pagado"; total: number; fechaPago?: string };
+export type Albaran = { id: string; localId: string; fecha: string; lineas: Linea[]; estado: "pendiente" | "pagado"; total: number; fechaPago?: string | undefined };
 type State = { decimos: Decimo[]; locales: Local[]; albaranes: Albaran[]; cargado: boolean };
 
 const empty: State = { decimos: [], locales: [], albaranes: [], cargado: false };
