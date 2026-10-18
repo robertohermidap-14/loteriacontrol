@@ -47,7 +47,7 @@ function Asignar() {
         {!stock.length && <p className="text-muted-foreground">No hay stock en la Administración.</p>}
       </div>
       <Button size="lg" className="mt-6 h-14 w-full text-lg" disabled={!localId || !total}
-        onClick={() => { const id = actions.crearAlbaran(localId, Object.entries(cant).map(([decimoId, cantidad]) => ({ decimoId, cantidad }))); nav({ to: "/albaran/$id", params: { id } }); }}>
+        onClick={async () => { const id = await actions.crearAlbaran(localId, Object.entries(cant).map(([decimoId, cantidad]) => ({ decimoId, cantidad }))); nav({ to: "/albaran/$id", params: { id } }); }}>
         Generar albarán ({total} décimos)
       </Button>
     </>

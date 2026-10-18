@@ -29,7 +29,7 @@ function AlbaranPage() {
   useEffect(() => { if (a) setLineas(a.lineas); }, [a]);
   useEffect(() => { setUrl(`${window.location.origin}/albaran/${id}`); }, [id]);
 
-  if (!a) return <p className="text-muted-foreground">Albarán no encontrado en este dispositivo.</p>;
+  if (!a) return <p className="text-muted-foreground">Albarán no encontrado.</p>;
   const pagado = a.estado === "pagado";
   const total = lineas.reduce((s, l) => s + l.pagados * PRECIO_DECIMO, 0);
   const upd = (i: number, k: "devueltos" | "pagados", v: number) =>
