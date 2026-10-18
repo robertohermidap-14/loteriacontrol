@@ -10,33 +10,115 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AsignarRouteImport } from './routes/asignar'
+import { Route as CobroRouteImport } from './routes/cobro'
+import { Route as EscanerRouteImport } from './routes/escaner'
+import { Route as InventarioRouteImport } from './routes/inventario'
+import { Route as LocalesRouteImport } from './routes/locales'
+import { Route as AlbaranIdRouteImport } from './routes/albaran.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AsignarRoute = AsignarRouteImport.update({
+  id: '/asignar',
+  path: '/asignar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CobroRoute = CobroRouteImport.update({
+  id: '/cobro',
+  path: '/cobro',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EscanerRoute = EscanerRouteImport.update({
+  id: '/escaner',
+  path: '/escaner',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InventarioRoute = InventarioRouteImport.update({
+  id: '/inventario',
+  path: '/inventario',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LocalesRoute = LocalesRouteImport.update({
+  id: '/locales',
+  path: '/locales',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AlbaranIdRoute = AlbaranIdRouteImport.update({
+  id: '/albaran/$id',
+  path: '/albaran/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/asignar': typeof AsignarRoute
+  '/cobro': typeof CobroRoute
+  '/escaner': typeof EscanerRoute
+  '/inventario': typeof InventarioRoute
+  '/locales': typeof LocalesRoute
+  '/albaran/$id': typeof AlbaranIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/asignar': typeof AsignarRoute
+  '/cobro': typeof CobroRoute
+  '/escaner': typeof EscanerRoute
+  '/inventario': typeof InventarioRoute
+  '/locales': typeof LocalesRoute
+  '/albaran/$id': typeof AlbaranIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/asignar': typeof AsignarRoute
+  '/cobro': typeof CobroRoute
+  '/escaner': typeof EscanerRoute
+  '/inventario': typeof InventarioRoute
+  '/locales': typeof LocalesRoute
+  '/albaran/$id': typeof AlbaranIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/asignar'
+    | '/cobro'
+    | '/escaner'
+    | '/inventario'
+    | '/locales'
+    | '/albaran/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/asignar'
+    | '/cobro'
+    | '/escaner'
+    | '/inventario'
+    | '/locales'
+    | '/albaran/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/asignar'
+    | '/cobro'
+    | '/escaner'
+    | '/inventario'
+    | '/locales'
+    | '/albaran/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AsignarRoute: typeof AsignarRoute
+  CobroRoute: typeof CobroRoute
+  EscanerRoute: typeof EscanerRoute
+  InventarioRoute: typeof InventarioRoute
+  LocalesRoute: typeof LocalesRoute
+  AlbaranIdRoute: typeof AlbaranIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +130,59 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/asignar': {
+      id: '/asignar'
+      path: '/asignar'
+      fullPath: '/asignar'
+      preLoaderRoute: typeof AsignarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cobro': {
+      id: '/cobro'
+      path: '/cobro'
+      fullPath: '/cobro'
+      preLoaderRoute: typeof CobroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/escaner': {
+      id: '/escaner'
+      path: '/escaner'
+      fullPath: '/escaner'
+      preLoaderRoute: typeof EscanerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inventario': {
+      id: '/inventario'
+      path: '/inventario'
+      fullPath: '/inventario'
+      preLoaderRoute: typeof InventarioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/locales': {
+      id: '/locales'
+      path: '/locales'
+      fullPath: '/locales'
+      preLoaderRoute: typeof LocalesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/albaran/$id': {
+      id: '/albaran/$id'
+      path: '/albaran/$id'
+      fullPath: '/albaran/$id'
+      preLoaderRoute: typeof AlbaranIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AsignarRoute: AsignarRoute,
+  CobroRoute: CobroRoute,
+  EscanerRoute: EscanerRoute,
+  InventarioRoute: InventarioRoute,
+  LocalesRoute: LocalesRoute,
+  AlbaranIdRoute: AlbaranIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
