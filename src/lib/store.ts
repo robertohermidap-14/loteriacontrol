@@ -67,7 +67,7 @@ async function subStock(id: string, n: number) {
   if (c > 0) await supabase.from("decimos").update({ cantidad: c }).eq("id", id);
   else await supabase.from("decimos").delete().eq("id", id);
 }
-const done = async <T,>(p: Promise<T>) => { const r = await p; await recargar(); return r; };
+const done = async <T,>(p: PromiseLike<T>) => { const r = await p; await recargar(); return r; };
 
 export const actions = {
   altaDecimo: (d: Omit<Decimo, "id">) => done(addStock(d)),
