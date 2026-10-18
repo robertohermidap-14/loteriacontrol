@@ -28,7 +28,7 @@ function Cobro() {
       <PageTitle sub="Escanea el QR del albarán impreso">Cobro en ruta</PageTitle>
       <Scanner qrOnly onScan={(t) => {
         const m = t.match(/ALB-[A-Z0-9]+/);
-        if (!m) return toast.error("QR no reconocido");
+        if (!m) { toast.error("QR no reconocido"); return; }
         nav({ to: "/albaran/$id", params: { id: m[0] } });
       }} />
       <h2 className="mb-2 mt-8 text-lg font-semibold">Albaranes pendientes</h2>
