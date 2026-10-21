@@ -19,27 +19,39 @@ export type Database = {
           estado: string
           fecha: string
           fecha_pago: string | null
+          firma: string
           id: string
           lineas: Json
           local_id: string
+          receptor_dni: string
+          receptor_nombre: string
+          tipo: string
           total: number
         }
         Insert: {
           estado?: string
           fecha?: string
           fecha_pago?: string | null
+          firma?: string
           id: string
           lineas?: Json
           local_id: string
+          receptor_dni?: string
+          receptor_nombre?: string
+          tipo?: string
           total?: number
         }
         Update: {
           estado?: string
           fecha?: string
           fecha_pago?: string | null
+          firma?: string
           id?: string
           lineas?: Json
           local_id?: string
+          receptor_dni?: string
+          receptor_nombre?: string
+          tipo?: string
           total?: number
         }
         Relationships: []
@@ -48,6 +60,7 @@ export type Database = {
         Row: {
           cantidad: number
           created_at: string
+          estado: string
           fraccion: string
           id: string
           numero: string
@@ -57,6 +70,7 @@ export type Database = {
         Insert: {
           cantidad?: number
           created_at?: string
+          estado?: string
           fraccion?: string
           id: string
           numero: string
@@ -66,6 +80,7 @@ export type Database = {
         Update: {
           cantidad?: number
           created_at?: string
+          estado?: string
           fraccion?: string
           id?: string
           numero?: string

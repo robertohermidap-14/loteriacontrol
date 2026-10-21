@@ -1,9 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { PageTitle } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { actions, uid, useStore, type Local } from "@/lib/store";
+import { actions, euros, uid, useStore, type Local } from "@/lib/store";
 
 export const Route = createFileRoute("/locales")({
   head: () => ({
@@ -22,7 +22,7 @@ export const Route = createFileRoute("/locales")({
 const vacio: Local = { id: "", nombre: "", direccion: "", telefono: "" };
 
 function Locales() {
-  const { locales, decimos } = useStore();
+  const { locales, decimos, albaranes } = useStore();
   const [f, setF] = useState<Local>(vacio);
 
   return (
@@ -53,6 +53,15 @@ function Locales() {
               <div className="mt-3 flex flex-wrap gap-2">
                 {asig.map((d) => <span key={d.id} className="rounded-md bg-secondary px-2 py-1 font-mono text-sm">{d.numero} ×{d.cantidad}</span>)}
                 {!asig.length && <span className="text-sm text-muted-foreground">Sin décimos asignados</span>}
+              </div>
+              <div className="mt-3 space-y-1">
+                <p className="text-xs uppercase tracking-wider text-muted-foreground">Albaranes</p>
+                {albaranes.filter((a) => a.localId === l.id).map((a) => (
+                  <Link key={a.id} to="/albaran/$id" params={{ id: a.id }} className="flex justify-between rounded-lg border border-border px-2 py-1 text-sm hover:border-primary">
+                    <span className="truncate">{a.tipo === "deposito" ? "Depósito" : "Entrega"} · {new Date(a.fecha).toLocaleDateString("es-ES")}{a.receptorNombre ? ` · ${a.receptorNombre}` : ""}</span>
+                    <span className={a.estado === "pagado" ? "text-accent" : "text-muted-foreground"}>{a.estado === "pagado" ? euros(a.total) : "Pendiente"}</span>
+                  </Link>
+                ))}
               </div>
             </div>
           );
