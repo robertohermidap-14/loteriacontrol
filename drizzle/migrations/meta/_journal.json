@@ -15,6 +15,13 @@
       "when": 1792605360162,
       "tag": "0001_deposito_estado",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792607738635,
+      "tag": "0002_perfiles_roles_y_cobro",
+      "breakpoints": true
     }
   ]
 }

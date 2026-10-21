@@ -15,6 +15,7 @@ import { Route as CobroRouteImport } from './routes/cobro'
 import { Route as EscanerRouteImport } from './routes/escaner'
 import { Route as InventarioRouteImport } from './routes/inventario'
 import { Route as LocalesRouteImport } from './routes/locales'
+import { Route as UsuariosRouteImport } from './routes/usuarios'
 import { Route as AlbaranIdRouteImport } from './routes/albaran.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -47,6 +48,11 @@ const LocalesRoute = LocalesRouteImport.update({
   path: '/locales',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UsuariosRoute = UsuariosRouteImport.update({
+  id: '/usuarios',
+  path: '/usuarios',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AlbaranIdRoute = AlbaranIdRouteImport.update({
   id: '/albaran/$id',
   path: '/albaran/$id',
@@ -60,6 +66,7 @@ export interface FileRoutesByFullPath {
   '/escaner': typeof EscanerRoute
   '/inventario': typeof InventarioRoute
   '/locales': typeof LocalesRoute
+  '/usuarios': typeof UsuariosRoute
   '/albaran/$id': typeof AlbaranIdRoute
 }
 export interface FileRoutesByTo {
@@ -69,6 +76,7 @@ export interface FileRoutesByTo {
   '/escaner': typeof EscanerRoute
   '/inventario': typeof InventarioRoute
   '/locales': typeof LocalesRoute
+  '/usuarios': typeof UsuariosRoute
   '/albaran/$id': typeof AlbaranIdRoute
 }
 export interface FileRoutesById {
@@ -79,6 +87,7 @@ export interface FileRoutesById {
   '/escaner': typeof EscanerRoute
   '/inventario': typeof InventarioRoute
   '/locales': typeof LocalesRoute
+  '/usuarios': typeof UsuariosRoute
   '/albaran/$id': typeof AlbaranIdRoute
 }
 export interface FileRouteTypes {
@@ -90,6 +99,7 @@ export interface FileRouteTypes {
     | '/escaner'
     | '/inventario'
     | '/locales'
+    | '/usuarios'
     | '/albaran/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -99,6 +109,7 @@ export interface FileRouteTypes {
     | '/escaner'
     | '/inventario'
     | '/locales'
+    | '/usuarios'
     | '/albaran/$id'
   id:
     | '__root__'
@@ -108,6 +119,7 @@ export interface FileRouteTypes {
     | '/escaner'
     | '/inventario'
     | '/locales'
+    | '/usuarios'
     | '/albaran/$id'
   fileRoutesById: FileRoutesById
 }
@@ -118,6 +130,7 @@ export interface RootRouteChildren {
   EscanerRoute: typeof EscanerRoute
   InventarioRoute: typeof InventarioRoute
   LocalesRoute: typeof LocalesRoute
+  UsuariosRoute: typeof UsuariosRoute
   AlbaranIdRoute: typeof AlbaranIdRoute
 }
 
@@ -165,6 +178,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LocalesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/usuarios': {
+      id: '/usuarios'
+      path: '/usuarios'
+      fullPath: '/usuarios'
+      preLoaderRoute: typeof UsuariosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/albaran/$id': {
       id: '/albaran/$id'
       path: '/albaran/$id'
@@ -182,6 +202,7 @@ const rootRouteChildren: RootRouteChildren = {
   EscanerRoute: EscanerRoute,
   InventarioRoute: InventarioRoute,
   LocalesRoute: LocalesRoute,
+  UsuariosRoute: UsuariosRoute,
   AlbaranIdRoute: AlbaranIdRoute,
 }
 export const routeTree = rootRouteImport
