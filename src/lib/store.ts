@@ -77,7 +77,8 @@ export const actions = {
     const d = state.decimos.find((x) => x.id === id);
     if (!d || d.estado === "venta") return;
     await supabase.from("decimos").delete().eq("id", id);
-    await addStock({ ...d, estado: "venta" });
+    const { id: _x, ...rest } = d; void _x;
+    await addStock({ ...rest, estado: "venta" });
   })()),
   sumar: (id: string, n: number) => done((async () => {
     const { data } = await supabase.from("decimos").select("cantidad").eq("id", id).maybeSingle();
