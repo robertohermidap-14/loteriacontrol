@@ -4,10 +4,11 @@ import { supabase } from "@/integrations/supabase/client";
 export const CENTRAL = "central";
 export const PRECIO_DECIMO = 20;
 
-export type Decimo = { id: string; numero: string; serie: string; fraccion: string; cantidad: number; ubicacion: string };
+export type Decimo = { id: string; numero: string; serie: string; fraccion: string; cantidad: number; ubicacion: string; estado: "recepcion" | "venta" };
 export type Local = { id: string; nombre: string; direccion: string; telefono: string };
 export type Linea = { numero: string; serie: string; fraccion: string; cantidad: number; devueltos: number; pagados: number };
-export type Albaran = { id: string; localId: string; fecha: string; lineas: Linea[]; estado: "pendiente" | "pagado"; total: number; fechaPago?: string | undefined };
+export type Albaran = { id: string; localId: string; fecha: string; lineas: Linea[]; estado: "pendiente" | "pagado"; total: number; fechaPago?: string | undefined; tipo: "entrega" | "deposito"; receptorNombre: string; receptorDni: string; firma: string };
+export type Deposito = { tipo: "entrega" | "deposito"; receptorNombre: string; receptorDni: string; firma: string };
 type State = { decimos: Decimo[]; locales: Local[]; albaranes: Albaran[]; cargado: boolean };
 
 const empty: State = { decimos: [], locales: [], albaranes: [], cargado: false };
@@ -23,9 +24,9 @@ export async function recargar() {
   ]);
   state = {
     cargado: true,
-    decimos: (d.data ?? []).map((x) => ({ id: x.id, numero: x.numero, serie: x.serie, fraccion: x.fraccion, cantidad: x.cantidad, ubicacion: x.ubicacion })),
+    decimos: (d.data ?? []).map((x) => ({ id: x.id, numero: x.numero, serie: x.serie, fraccion: x.fraccion, cantidad: x.cantidad, ubicacion: x.ubicacion, estado: (x.estado as Decimo["estado"]) ?? "venta" })),
     locales: (l.data ?? []).map((x) => ({ id: x.id, nombre: x.nombre, direccion: x.direccion, telefono: x.telefono })),
-    albaranes: (a.data ?? []).map((x) => ({ id: x.id, localId: x.local_id, fecha: x.fecha, lineas: x.lineas as unknown as Linea[], estado: x.estado as Albaran["estado"], total: Number(x.total), fechaPago: x.fecha_pago ?? undefined })),
+    albaranes: (a.data ?? []).map((x) => ({ id: x.id, localId: x.local_id, fecha: x.fecha, lineas: x.lineas as unknown as Linea[], estado: x.estado as Albaran["estado"], total: Number(x.total), fechaPago: x.fecha_pago ?? undefined, tipo: (x.tipo as Albaran["tipo"]) ?? "entrega", receptorNombre: x.receptor_nombre, receptorDni: x.receptor_dni, firma: x.firma })),
   };
   emit();
 }
@@ -56,7 +57,7 @@ export const getState = () => state;
 export const uid = () => Math.random().toString(36).slice(2, 10).toUpperCase();
 
 async function addStock(d: Omit<Decimo, "id">) {
-  const { data } = await supabase.from("decimos").select("id,cantidad").match({ numero: d.numero, serie: d.serie, fraccion: d.fraccion, ubicacion: d.ubicacion }).maybeSingle();
+  const { data } = await supabase.from("decimos").select("id,cantidad").match({ numero: d.numero, serie: d.serie, fraccion: d.fraccion, ubicacion: d.ubicacion, estado: d.estado }).maybeSingle();
   if (data) await supabase.from("decimos").update({ cantidad: data.cantidad + d.cantidad }).eq("id", data.id);
   else await supabase.from("decimos").insert({ ...d, id: uid() });
 }
@@ -71,6 +72,13 @@ const done = async <T,>(p: PromiseLike<T>) => { const r = await p; await recarga
 
 export const actions = {
   altaDecimo: (d: Omit<Decimo, "id">) => done(addStock(d)),
+  altaBloque: (items: Omit<Decimo, "id">[]) => done((async () => { for (const d of items) await addStock(d); })()),
+  ponerEnVenta: (id: string) => done((async () => {
+    const d = state.decimos.find((x) => x.id === id);
+    if (!d || d.estado === "venta") return;
+    await supabase.from("decimos").delete().eq("id", id);
+    await addStock({ ...d, estado: "venta" });
+  })()),
   sumar: (id: string, n: number) => done((async () => {
     const { data } = await supabase.from("decimos").select("cantidad").eq("id", id).maybeSingle();
     if (data) await supabase.from("decimos").update({ cantidad: data.cantidad + n }).eq("id", id);
@@ -79,7 +87,7 @@ export const actions = {
   eliminarDecimo: (id: string) => done(supabase.from("decimos").delete().eq("id", id).then(() => {})),
   guardarLocal: (l: Local) => done(supabase.from("locales").upsert(l).then(() => {})),
   eliminarLocal: (id: string) => done(supabase.from("locales").delete().eq("id", id).then(() => {})),
-  crearAlbaran: async (localId: string, items: { decimoId: string; cantidad: number }[]): Promise<string> => {
+  crearAlbaran: async (localId: string, items: { decimoId: string; cantidad: number }[], dep: Deposito = { tipo: "entrega", receptorNombre: "", receptorDni: "", firma: "" }): Promise<string> => {
     const id = "ALB-" + uid();
     const lineas: Linea[] = [];
     for (const it of items) {
@@ -87,10 +95,10 @@ export const actions = {
       if (!d || it.cantidad <= 0) continue;
       const n = Math.min(it.cantidad, d.cantidad);
       await subStock(d.id, n);
-      await addStock({ numero: d.numero, serie: d.serie, fraccion: d.fraccion, cantidad: n, ubicacion: localId });
+      await addStock({ numero: d.numero, serie: d.serie, fraccion: d.fraccion, cantidad: n, ubicacion: localId, estado: "venta" });
       lineas.push({ numero: d.numero, serie: d.serie, fraccion: d.fraccion, cantidad: n, devueltos: 0, pagados: n });
     }
-    await supabase.from("albaranes").insert({ id, local_id: localId, lineas });
+    await supabase.from("albaranes").insert({ id, local_id: localId, lineas, tipo: dep.tipo, receptor_nombre: dep.receptorNombre, receptor_dni: dep.receptorDni, firma: dep.firma });
     await recargar();
     return id;
   },
@@ -100,7 +108,7 @@ export const actions = {
     for (const l of lineas) {
       const d = state.decimos.find((x) => x.numero === l.numero && x.serie === l.serie && x.fraccion === l.fraccion && x.ubicacion === a.localId);
       if (d) await subStock(d.id, l.devueltos + l.pagados);
-      if (l.devueltos > 0) await addStock({ numero: l.numero, serie: l.serie, fraccion: l.fraccion, cantidad: l.devueltos, ubicacion: CENTRAL });
+      if (l.devueltos > 0) await addStock({ numero: l.numero, serie: l.serie, fraccion: l.fraccion, cantidad: l.devueltos, ubicacion: CENTRAL, estado: "venta" });
     }
     const total = lineas.reduce((t, l) => t + l.pagados * PRECIO_DECIMO, 0);
     await supabase.from("albaranes").update({ lineas, estado: "pagado", total, fecha_pago: new Date().toISOString() }).eq("id", id);
