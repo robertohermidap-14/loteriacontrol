@@ -50,12 +50,12 @@ function AlbaranPage() {
     <div className="print-sheet mx-auto max-w-2xl rounded-2xl border border-border bg-card p-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-xs uppercase tracking-widest text-muted-foreground">Albarán de entrega</p>
+          <p className="text-xs uppercase tracking-widest text-muted-foreground">{a.tipo === "deposito" ? "Albarán de depósito" : "Albarán de entrega"}</p>
           <h1 className="font-mono text-2xl font-bold">{a.id}</h1>
           <p className="mt-2 font-semibold">{local?.nombre}</p>
           <p className="text-sm text-muted-foreground">{local?.direccion}</p>
           <p className="text-sm text-muted-foreground">{new Date(a.fecha).toLocaleString("es-ES")}</p>
-          <span className={`mt-2 inline-block rounded-md px-2 py-1 text-xs font-semibold ${pagado ? "bg-accent text-accent-foreground" : "bg-secondary"}`}>{pagado ? "PAGADO" : "PENDIENTE"}</span>
+          <span className={`mt-2 inline-block rounded-md px-2 py-1 text-xs font-semibold ${pagado ? "bg-accent text-accent-foreground" : "bg-secondary"}`}>{pagado ? "COBRADO" : "PENDIENTE DE COBRO"}</span>
         </div>
         <div className="shrink-0 rounded-lg bg-foreground p-2"><QRCodeSVG value={a.id} size={120} /></div>
       </div>
@@ -85,11 +85,18 @@ function AlbaranPage() {
       </table>
       <div className="mt-4 flex justify-between text-xl font-bold"><span>Total a cobrar</span><span className="text-primary">{euros(pagado ? a.total : total)}</span></div>
 
+      {a.tipo === "deposito" && (
+        <div className="mt-6 rounded-xl border border-border p-4 text-sm">
+          <p><b>Recoge:</b> {a.receptorNombre} · <b>DNI:</b> {a.receptorDni}</p>
+          <p><b>Fecha del depósito:</b> {new Date(a.fecha).toLocaleDateString("es-ES")}</p>
+          {a.firma && <img src={a.firma} alt="Firma de quien recoge" className="mt-2 h-28 rounded-lg border border-border bg-white" />}
+        </div>
+      )}
       <div className="no-print mt-6 grid gap-2 sm:grid-cols-2">
         <Button variant="secondary" size="lg" onClick={() => window.print()}>Imprimir albarán</Button>
         {pagado
           ? <Button size="lg" variant="default" onClick={wa}>Enviar albarán de pago por WhatsApp</Button>
-          : <Button size="lg" onClick={() => actions.liquidar(a.id, lineas)}>Confirmar pago</Button>}
+          : <Button size="lg" onClick={() => actions.liquidar(a.id, lineas)}>Saldar como cobrado</Button>}
       </div>
     </div>
   );

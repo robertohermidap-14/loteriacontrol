@@ -3,6 +3,8 @@ import { useState } from "react";
 import { PageTitle } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Firma } from "@/components/Firma";
 import { actions, CENTRAL, useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/asignar")({
@@ -25,6 +27,10 @@ function Asignar() {
   const [localId, setLocalId] = useState("");
   const [cant, setCant] = useState<Record<string, number>>({});
   const stock = decimos.filter((d) => d.ubicacion === CENTRAL).sort((a, b) => a.numero.localeCompare(b.numero));
+  const [tipo, setTipo] = useState<"entrega" | "deposito">("entrega");
+  const [nombre, setNombre] = useState("");
+  const [dni, setDni] = useState("");
+  const [firma, setFirma] = useState("");
   const total = Object.values(cant).reduce((s, n) => s + n, 0);
 
   return (
@@ -39,16 +45,30 @@ function Asignar() {
       <div className="space-y-2">
         {stock.map((d) => (
           <div key={d.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-xl border border-border bg-card p-3">
-            <div className="min-w-0"><span className="font-mono text-xl font-bold text-primary">{d.numero}</span><span className="ml-2 text-sm text-muted-foreground">Disp: {d.cantidad}</span></div>
+            <div className="min-w-0"><span className="font-mono text-xl font-bold text-primary">{d.numero}</span><span className="ml-2 text-xs text-muted-foreground">S{d.serie || "—"} {d.estado === "recepcion" ? "· recepción" : ""}</span><span className="ml-2 text-sm text-muted-foreground">Disp: {d.cantidad}</span></div>
             <Input type="number" min={0} max={d.cantidad} className="w-24" value={cant[d.id] ?? 0}
               onChange={(e) => setCant({ ...cant, [d.id]: Math.min(d.cantidad, Math.max(0, +e.target.value)) })} />
           </div>
         ))}
         {!stock.length && <p className="text-muted-foreground">No hay stock en la Administración.</p>}
       </div>
-      <Button size="lg" className="mt-6 h-14 w-full text-lg" disabled={!localId || !total}
-        onClick={async () => { const id = await actions.crearAlbaran(localId, Object.entries(cant).map(([decimoId, cantidad]) => ({ decimoId, cantidad }))); nav({ to: "/albaran/$id", params: { id } }); }}>
-        Generar albarán ({total} décimos)
+      <div className="mt-6 grid grid-cols-2 gap-2">
+        <Button variant={tipo === "entrega" ? "default" : "secondary"} onClick={() => setTipo("entrega")}>Entrega</Button>
+        <Button variant={tipo === "deposito" ? "default" : "secondary"} onClick={() => setTipo("deposito")}>Depósito</Button>
+      </div>
+      {tipo === "deposito" && (
+        <div className="mt-4 space-y-3 rounded-2xl border border-border bg-card p-4">
+          <p className="text-sm text-muted-foreground">Fecha del depósito: <b>{new Date().toLocaleDateString("es-ES")}</b></p>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <div><Label>Nombre de quien recoge</Label><Input value={nombre} onChange={(e) => setNombre(e.target.value)} /></div>
+            <div><Label>DNI</Label><Input value={dni} onChange={(e) => setDni(e.target.value.toUpperCase())} /></div>
+          </div>
+          <div><Label>Firma</Label><Firma onChange={setFirma} /></div>
+        </div>
+      )}
+      <Button size="lg" className="mt-6 h-14 w-full text-lg" disabled={!localId || !total || (tipo === "deposito" && (!nombre || !dni || !firma))}
+        onClick={async () => { const id = await actions.crearAlbaran(localId, Object.entries(cant).map(([decimoId, cantidad]) => ({ decimoId, cantidad })), { tipo, receptorNombre: nombre, receptorDni: dni, firma }); nav({ to: "/albaran/$id", params: { id } }); }}>
+        Generar albarán {tipo === "deposito" ? "de depósito " : ""}({total} décimos)
       </Button>
     </>
   );
