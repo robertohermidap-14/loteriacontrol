@@ -22,6 +22,13 @@
       "when": 1792607738635,
       "tag": "0002_perfiles_roles_y_cobro",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792608207642,
+      "tag": "0003_restringir_politicas_por_rol",
+      "breakpoints": true
     }
   ]
 }
