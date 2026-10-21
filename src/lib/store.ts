@@ -7,7 +7,8 @@ export const PRECIO_DECIMO = 20;
 export type Decimo = { id: string; numero: string; serie: string; fraccion: string; cantidad: number; ubicacion: string; estado: "recepcion" | "venta" };
 export type Local = { id: string; nombre: string; direccion: string; telefono: string };
 export type Linea = { numero: string; serie: string; fraccion: string; cantidad: number; devueltos: number; pagados: number };
-export type Albaran = { id: string; localId: string; fecha: string; lineas: Linea[]; estado: "pendiente" | "pagado"; total: number; fechaPago?: string | undefined; tipo: "entrega" | "deposito"; receptorNombre: string; receptorDni: string; firma: string };
+export type Albaran = { id: string; localId: string; fecha: string; lineas: Linea[]; estado: "pendiente" | "pagado"; total: number; fechaPago?: string | undefined; tipo: "entrega" | "deposito"; receptorNombre: string; receptorDni: string; firma: string; cobradoPor: string; firmaCobro: string };
+export type Cobro = { cobradoPor: string; firmaCobro: string };
 export type Deposito = { tipo: "entrega" | "deposito"; receptorNombre: string; receptorDni: string; firma: string };
 type State = { decimos: Decimo[]; locales: Local[]; albaranes: Albaran[]; cargado: boolean };
 
@@ -26,7 +27,7 @@ export async function recargar() {
     cargado: true,
     decimos: (d.data ?? []).map((x) => ({ id: x.id, numero: x.numero, serie: x.serie, fraccion: x.fraccion, cantidad: x.cantidad, ubicacion: x.ubicacion, estado: (x.estado as Decimo["estado"]) ?? "venta" })),
     locales: (l.data ?? []).map((x) => ({ id: x.id, nombre: x.nombre, direccion: x.direccion, telefono: x.telefono })),
-    albaranes: (a.data ?? []).map((x) => ({ id: x.id, localId: x.local_id, fecha: x.fecha, lineas: x.lineas as unknown as Linea[], estado: x.estado as Albaran["estado"], total: Number(x.total), fechaPago: x.fecha_pago ?? undefined, tipo: (x.tipo as Albaran["tipo"]) ?? "entrega", receptorNombre: x.receptor_nombre, receptorDni: x.receptor_dni, firma: x.firma })),
+    albaranes: (a.data ?? []).map((x) => ({ id: x.id, localId: x.local_id, fecha: x.fecha, lineas: x.lineas as unknown as Linea[], estado: x.estado as Albaran["estado"], total: Number(x.total), fechaPago: x.fecha_pago ?? undefined, tipo: (x.tipo as Albaran["tipo"]) ?? "entrega", receptorNombre: x.receptor_nombre, receptorDni: x.receptor_dni, firma: x.firma, cobradoPor: x.cobrado_por, firmaCobro: x.firma_cobro })),
   };
   emit();
 }
@@ -103,7 +104,7 @@ export const actions = {
     await recargar();
     return id;
   },
-  liquidar: (id: string, lineas: Linea[]) => done((async () => {
+  liquidar: (id: string, lineas: Linea[], cobro: Cobro) => done((async () => {
     const a = state.albaranes.find((x) => x.id === id);
     if (!a || a.estado === "pagado") return;
     for (const l of lineas) {
@@ -112,7 +113,7 @@ export const actions = {
       if (l.devueltos > 0) await addStock({ numero: l.numero, serie: l.serie, fraccion: l.fraccion, cantidad: l.devueltos, ubicacion: CENTRAL, estado: "venta" });
     }
     const total = lineas.reduce((t, l) => t + l.pagados * PRECIO_DECIMO, 0);
-    await supabase.from("albaranes").update({ lineas, estado: "pagado", total, fecha_pago: new Date().toISOString() }).eq("id", id);
+    await supabase.from("albaranes").update({ lineas, estado: "pagado", total, fecha_pago: new Date().toISOString(), cobrado_por: cobro.cobradoPor, firma_cobro: cobro.firmaCobro }).eq("id", id);
   })()),
 };
 
