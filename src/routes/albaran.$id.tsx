@@ -1,8 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { QRCodeSVG } from "qrcode.react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Firma } from "@/components/Firma";
 import { actions, euros, PRECIO_DECIMO, useStore, type Linea } from "@/lib/store";
+import { EMPRESA, nombreCobrador, useSesion } from "@/lib/sesion";
 
 export const Route = createFileRoute("/albaran/$id")({
   head: ({ params }) => ({
@@ -22,10 +25,13 @@ export const Route = createFileRoute("/albaran/$id")({
 function AlbaranPage() {
   const { id } = Route.useParams();
   const { albaranes, locales } = useStore();
+  const sesion = useSesion();
   const a = albaranes.find((x) => x.id === id);
   const local = locales.find((l) => l.id === a?.localId);
   const [lineas, setLineas] = useState<Linea[]>([]);
   const [url, setUrl] = useState("");
+  const [cobrando, setCobrando] = useState(false);
+  const [firmaCobro, setFirmaCobro] = useState("");
   useEffect(() => { if (a) setLineas(a.lineas); }, [a]);
   useEffect(() => { setUrl(`${window.location.origin}/albaran/${id}`); }, [id]);
 
@@ -40,10 +46,21 @@ function AlbaranPage() {
     }));
 
   const wa = () => {
-    const txt = [`*Recibo de pago - ${a.id}*`, `Local: ${local?.nombre ?? ""}`, `Fecha: ${new Date(a.fechaPago ?? "").toLocaleString("es-ES")}`, "",
+    const txt = [pagado ? `*Recibo de pago - ${a.id}*` : `*Albarán - ${a.id}*`,
+      `${EMPRESA}`, `Local: ${local?.nombre ?? ""}`,
+      `Fecha: ${new Date(a.fechaPago ?? a.fecha).toLocaleString("es-ES")}`, "",
       ...a.lineas.map((l) => `${l.numero} · entregados ${l.cantidad} · devueltos ${l.devueltos} · pagados ${l.pagados} = ${euros(l.pagados * PRECIO_DECIMO)}`),
-      "", `*TOTAL PAGADO: ${euros(a.total)}*`, "", `Albarán digital: ${url}`].join("\n");
+      "", pagado ? `*TOTAL COBRADO: ${euros(a.total)}*` : `*TOTAL PENDIENTE: ${euros(total)}*`,
+      ...(pagado && a.cobradoPor ? [`Cobrado por: ${a.cobradoPor}`] : []),
+      "", `Albarán digital: ${url}`].join("\n");
     window.open(`https://wa.me/${(local?.telefono ?? "").replace(/\D/g, "")}?text=${encodeURIComponent(txt)}`, "_blank");
+  };
+
+  const confirmarCobro = async () => {
+    if (!firmaCobro) { toast.error("Falta la firma de quien cobra"); return; }
+    await actions.liquidar(a.id, lineas, { cobradoPor: nombreCobrador(sesion), firmaCobro });
+    setCobrando(false);
+    toast.success("Albarán saldado como cobrado");
   };
 
   return (
@@ -55,9 +72,11 @@ function AlbaranPage() {
           <p className="mt-2 font-semibold">{local?.nombre}</p>
           <p className="text-sm text-muted-foreground">{local?.direccion}</p>
           <p className="text-sm text-muted-foreground">{new Date(a.fecha).toLocaleString("es-ES")}</p>
-          <span className={`mt-2 inline-block rounded-md px-2 py-1 text-xs font-semibold ${pagado ? "bg-accent text-accent-foreground" : "bg-secondary"}`}>{pagado ? "COBRADO" : "PENDIENTE DE COBRO"}</span>
+          <span className={`mt-3 inline-block rounded-lg px-4 py-2 text-xl font-extrabold tracking-wide sm:text-2xl ${pagado ? "bg-accent text-accent-foreground" : "bg-destructive text-destructive-foreground"}`}>
+            {pagado ? "COBRADO" : "PENDIENTE DE COBRO"}
+          </span>
         </div>
-        <div className="shrink-0 rounded-lg bg-foreground p-2"><QRCodeSVG value={a.id} size={120} /></div>
+        <div className="shrink-0 rounded-lg bg-foreground p-2"><QRCodeSVG value={url || a.id} size={120} /></div>
       </div>
 
       <table className="mt-6 w-full text-sm">
@@ -83,7 +102,10 @@ function AlbaranPage() {
           ))}
         </tbody>
       </table>
-      <div className="mt-4 flex justify-between text-xl font-bold"><span>Total a cobrar</span><span className="text-primary">{euros(pagado ? a.total : total)}</span></div>
+      <div className="mt-4 flex justify-between text-xl font-bold">
+        <span>{a.tipo === "deposito" ? "TOTAL EN DEPÓSITO" : "Total a cobrar"}</span>
+        <span className="text-primary">{euros(pagado ? a.total : total)}</span>
+      </div>
 
       {a.tipo === "deposito" && (
         <div className="mt-6 rounded-xl border border-border p-4 text-sm">
@@ -92,11 +114,30 @@ function AlbaranPage() {
           {a.firma && <img src={a.firma} alt="Firma de quien recoge" className="mt-2 h-28 rounded-lg border border-border bg-white" />}
         </div>
       )}
-      <div className="no-print mt-6 grid gap-2 sm:grid-cols-2">
+
+      {pagado && (
+        <div className="mt-6 rounded-xl border border-accent p-4 text-sm">
+          <p><b>Cobrado por:</b> {a.cobradoPor}</p>
+          <p><b>Fecha y hora del cobro:</b> {new Date(a.fechaPago ?? "").toLocaleString("es-ES")}</p>
+          {a.firmaCobro && <img src={a.firmaCobro} alt="Firma de quien cobra" className="mt-2 h-28 rounded-lg border border-border bg-white" />}
+        </div>
+      )}
+
+      {!pagado && cobrando && (
+        <div className="no-print mt-6 space-y-3 rounded-2xl border border-primary p-4">
+          <p className="text-sm">Cobra: <b>{nombreCobrador(sesion)}</b></p>
+          <Firma onChange={setFirmaCobro} />
+          <div className="flex gap-2">
+            <Button variant="secondary" className="flex-1" onClick={() => setCobrando(false)}>Cancelar</Button>
+            <Button className="flex-1" onClick={confirmarCobro}>Confirmar cobro de {euros(total)}</Button>
+          </div>
+        </div>
+      )}
+
+      <div className="no-print mt-6 grid gap-2 sm:grid-cols-3">
         <Button variant="secondary" size="lg" onClick={() => window.print()}>Imprimir albarán</Button>
-        {pagado
-          ? <Button size="lg" variant="default" onClick={wa}>Enviar albarán de pago por WhatsApp</Button>
-          : <Button size="lg" onClick={() => actions.liquidar(a.id, lineas)}>Saldar como cobrado</Button>}
+        {!pagado && !cobrando && <Button size="lg" onClick={() => setCobrando(true)}>Saldar como cobrado</Button>}
+        <Button size="lg" variant="default" onClick={wa}>Enviar por WhatsApp</Button>
       </div>
     </div>
   );
