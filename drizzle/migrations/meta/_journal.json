@@ -8,6 +8,13 @@
       "when": 1792348211021,
       "tag": "0000_loteria_tablas",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792605360162,
+      "tag": "0001_deposito_estado",
+      "breakpoints": true
     }
   ]
 }
