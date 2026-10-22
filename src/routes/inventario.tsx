@@ -27,6 +27,7 @@ function Inventario() {
   const { decimos, locales } = useStore();
   const [nuevo, setNuevo] = useState("");
   const [alta, setAlta] = useState<string | null>(null);
+  const [venta, setVenta] = useState<Record<string,number>>({});
   const [q, setQ] = useState("");
   const [abierto, setAbierto] = useState<string | null>(null);
 
@@ -45,7 +46,7 @@ function Inventario() {
       <Input className="mb-4" placeholder="Buscar número…" value={q} onChange={(e) => setQ(e.target.value)} />
       <div className="space-y-2">
         {numeros.map((num) => {
-          const items = grupos.get(num)!;
+          const items = grupos.get(num) ?? [];
           const central = items.filter((d) => d.ubicacion === CENTRAL);
           const open = abierto === num;
           return (
@@ -58,6 +59,7 @@ function Inventario() {
               </button>
               {open && (
                 <div className="space-y-2 border-t border-border p-3">
+                  {[...new Set(central.filter(d=>d.estado==="recepcion").map(d=>d.serie))].map(serie=><Button key={serie} size="sm" variant="secondary" onClick={async()=>{for(const d of central.filter(d=>d.serie===serie && d.estado==="recepcion")) await actions.ponerEnVenta(d.id);}}>Poner serie {serie} completa en venta</Button>)}
                   {items.sort((a, b) => a.ubicacion.localeCompare(b.ubicacion) || a.serie.localeCompare(b.serie, undefined, { numeric: true })).map((d) => (
                     <div key={d.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-lg bg-secondary/50 p-2">
                       <div className="min-w-0">
@@ -66,8 +68,8 @@ function Inventario() {
                           {d.ubicacion === CENTRAL && <span className={`ml-2 rounded px-1.5 py-0.5 font-semibold ${d.estado === "venta" ? "bg-accent text-accent-foreground" : "bg-muted"}`}>{d.estado === "venta" ? "EN VENTA" : "RECEPCIÓN"}</span>}
                         </div>
                       </div>
-                      <div className="flex items-center gap-1">
-                        {d.estado === "recepcion" && <Button size="sm" onClick={() => actions.ponerEnVenta(d.id)}>Poner en venta</Button>}
+                      <div className="flex flex-wrap items-center justify-end gap-1">
+                        {d.estado === "recepcion" && <><Input aria-label={`Cantidad a poner en venta ${d.serie} ${d.fraccion}`} className="w-16" type="number" min={1} max={d.cantidad} value={venta[d.id] ?? d.cantidad} onChange={e=>setVenta({...venta,[d.id]:+e.target.value})} /><Button size="sm" onClick={() => actions.ponerEnVenta(d.id,venta[d.id] ?? d.cantidad)}>En venta</Button></>}
                         <Button size="icon" variant="secondary" onClick={() => actions.restar(d.id, 1)}>−</Button>
                         <span className="w-8 text-center font-semibold">{d.cantidad}</span>
                         <Button size="icon" variant="secondary" onClick={() => actions.sumar(d.id, 1)}>+</Button>
