@@ -26,18 +26,19 @@ export const Route = createFileRoute("/escaner")({
 function Escaner() {
   const [modo, setModo] = useState<"entrada" | "venta">("entrada");
   const [alta, setAlta] = useState<string | null>(null);
+  const [ventaNumero,setVentaNumero]=useState("");
   const [manual, setManual] = useState("");
 
   function procesar(numero: string) {
     if (modo === "entrada") { setAlta(numero); return; }
     const d = getState().decimos.find((x) => x.numero === numero && x.ubicacion === CENTRAL && x.estado === "venta");
     if (!d) toast.error(`${numero} no tiene stock en venta en la Administración`);
-    else { actions.restar(d.id, 1); toast.success(`${numero}: vendido 1 décimo`); }
+    else { setVentaNumero(numero); }
   }
   function onScan(code: string) {
     const n = extraerNumero(code);
     if (!n) { toast.error("Código no válido"); return; }
-    if (!alta) procesar(n);
+    if (!alta && !ventaNumero) procesar(n);
   }
 
   return (
@@ -52,6 +53,7 @@ function Escaner() {
         <Input placeholder="Número o código manual" value={manual} onChange={(e) => setManual(e.target.value)} inputMode="numeric" />
         <Button type="submit">Aplicar</Button>
       </form>
+      {ventaNumero && <section className="mt-5 space-y-3"><h2 className="font-bold">Vender {ventaNumero} · serie y fracción</h2>{getState().decimos.filter(d=>d.numero===ventaNumero && d.ubicacion===CENTRAL && d.estado==="venta" && d.cantidad>0).map(d=><Button key={d.id} variant="secondary" className="mr-2" onClick={async()=>{await actions.restar(d.id,1);toast.success(`Vendido: serie ${d.serie}, fracción ${d.fraccion || "sin detallar"}`);setVentaNumero("")}}>Serie {d.serie} · F {d.fraccion || "—"}</Button>)}<Button variant="ghost" onClick={()=>setVentaNumero("")}>Cancelar</Button></section>}
       {alta && <EntradaForm numero={alta} onClose={() => setAlta(null)} />}
     </>
   );

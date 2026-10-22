@@ -11,6 +11,7 @@ const nav = [
   { to: "/locales", label: "Locales", icon: Store },
   { to: "/asignar", label: "Asignar", icon: Truck },
   { to: "/cobro", label: "Cobro", icon: Wallet },
+  { to: "/caja", label: "Caja", icon: Wallet },
 ];
 
 export function AppShell({ children }: { children: ReactNode }) {
