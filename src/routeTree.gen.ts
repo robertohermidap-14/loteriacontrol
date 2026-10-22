@@ -17,6 +17,7 @@ import { Route as InventarioRouteImport } from './routes/inventario'
 import { Route as LocalesRouteImport } from './routes/locales'
 import { Route as UsuariosRouteImport } from './routes/usuarios'
 import { Route as AlbaranIdRouteImport } from './routes/albaran.$id'
+import { Route as ReciboTokenRouteImport } from './routes/recibo.$token'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -58,6 +59,11 @@ const AlbaranIdRoute = AlbaranIdRouteImport.update({
   path: '/albaran/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReciboTokenRoute = ReciboTokenRouteImport.update({
+  id: '/recibo/$token',
+  path: '/recibo/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -68,6 +74,7 @@ export interface FileRoutesByFullPath {
   '/locales': typeof LocalesRoute
   '/usuarios': typeof UsuariosRoute
   '/albaran/$id': typeof AlbaranIdRoute
+  '/recibo/$token': typeof ReciboTokenRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -78,6 +85,7 @@ export interface FileRoutesByTo {
   '/locales': typeof LocalesRoute
   '/usuarios': typeof UsuariosRoute
   '/albaran/$id': typeof AlbaranIdRoute
+  '/recibo/$token': typeof ReciboTokenRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -89,6 +97,7 @@ export interface FileRoutesById {
   '/locales': typeof LocalesRoute
   '/usuarios': typeof UsuariosRoute
   '/albaran/$id': typeof AlbaranIdRoute
+  '/recibo/$token': typeof ReciboTokenRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -101,6 +110,7 @@ export interface FileRouteTypes {
     | '/locales'
     | '/usuarios'
     | '/albaran/$id'
+    | '/recibo/$token'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -111,6 +121,7 @@ export interface FileRouteTypes {
     | '/locales'
     | '/usuarios'
     | '/albaran/$id'
+    | '/recibo/$token'
   id:
     | '__root__'
     | '/'
@@ -121,6 +132,7 @@ export interface FileRouteTypes {
     | '/locales'
     | '/usuarios'
     | '/albaran/$id'
+    | '/recibo/$token'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -132,6 +144,7 @@ export interface RootRouteChildren {
   LocalesRoute: typeof LocalesRoute
   UsuariosRoute: typeof UsuariosRoute
   AlbaranIdRoute: typeof AlbaranIdRoute
+  ReciboTokenRoute: typeof ReciboTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -192,6 +205,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AlbaranIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/recibo/$token': {
+      id: '/recibo/$token'
+      path: '/recibo/$token'
+      fullPath: '/recibo/$token'
+      preLoaderRoute: typeof ReciboTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -204,6 +224,7 @@ const rootRouteChildren: RootRouteChildren = {
   LocalesRoute: LocalesRoute,
   UsuariosRoute: UsuariosRoute,
   AlbaranIdRoute: AlbaranIdRoute,
+  ReciboTokenRoute: ReciboTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

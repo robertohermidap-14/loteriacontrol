@@ -6,6 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Firma } from "@/components/Firma";
 import { actions, euros, PRECIO_DECIMO, useStore, type Linea } from "@/lib/store";
 import { EMPRESA, nombreCobrador, useSesion } from "@/lib/sesion";
+import { crearEnlaceRecibo } from "@/lib/recibos.functions";
+import { reciboDeAlbaran, telefonoWhatsApp } from "@/lib/recibo";
+import { generarPdf, descargarPdf } from "@/lib/recibo-pdf";
+import { Download, Share2 } from "lucide-react";
 
 export const Route = createFileRoute("/albaran/$id")({
   head: ({ params }) => ({
@@ -32,8 +36,21 @@ function AlbaranPage() {
   const [url, setUrl] = useState("");
   const [cobrando, setCobrando] = useState(false);
   const [firmaCobro, setFirmaCobro] = useState("");
+  const [enviando, setEnviando] = useState(false);
+  const [pdf, setPdf] = useState<Blob | null>(null);
+  const [puedeCompartir, setPuedeCompartir] = useState(false);
   useEffect(() => { if (a) setLineas(a.lineas); }, [a]);
   useEffect(() => { setUrl(`${window.location.origin}/albaran/${id}`); }, [id]);
+  useEffect(() => {
+    let alive = true;
+    setPdf(null);
+    if (a) generarPdf(reciboDeAlbaran(a, local)).then((b) => {
+      if (!alive) return;
+      setPdf(b);
+      setPuedeCompartir(Boolean(navigator.canShare?.({ files: [new File([b], `${a.id}.pdf`, { type: "application/pdf" })] })));
+    }).catch(() => { if (alive) toast.error("No se pudo generar el PDF; puedes imprimir el albarán."); });
+    return () => { alive = false; };
+  }, [a, local]);
 
   if (!a) return <p className="text-muted-foreground">Albarán no encontrado.</p>;
   const pagado = a.estado === "pagado";
@@ -45,15 +62,34 @@ function AlbaranPage() {
       return k === "devueltos" ? { ...l, devueltos: n, pagados: Math.min(l.pagados, l.cantidad - n) } : { ...l, pagados: Math.min(n, l.cantidad - l.devueltos) };
     }));
 
-  const wa = () => {
-    const txt = [pagado ? `*Recibo de pago - ${a.id}*` : `*Albarán - ${a.id}*`,
-      `${EMPRESA}`, `Local: ${local?.nombre ?? ""}`,
-      `Fecha: ${new Date(a.fechaPago ?? a.fecha).toLocaleString("es-ES")}`, "",
-      ...a.lineas.map((l) => `${l.numero} · entregados ${l.cantidad} · devueltos ${l.devueltos} · pagados ${l.pagados} = ${euros(l.pagados * PRECIO_DECIMO)}`),
-      "", pagado ? `*TOTAL COBRADO: ${euros(a.total)}*` : `*TOTAL PENDIENTE: ${euros(total)}*`,
-      ...(pagado && a.cobradoPor ? [`Cobrado por: ${a.cobradoPor}`] : []),
-      "", `Albarán digital: ${url}`].join("\n");
-    window.open(`https://wa.me/${(local?.telefono ?? "").replace(/\D/g, "")}?text=${encodeURIComponent(txt)}`, "_blank");
+  const wa = async () => {
+    let telefono: string;
+    try { telefono = telefonoWhatsApp(local?.telefono ?? ""); }
+    catch (err) { toast.error(err instanceof Error ? err.message : "Revisa el teléfono del local."); return; }
+    // Reserve the tab during the click, before the async request loses user activation.
+    const tab = window.open("about:blank", "_blank");
+    if (tab) tab.opener = null;
+    setEnviando(true);
+    try {
+      const { token } = await crearEnlaceRecibo({ data: { id: a.id } });
+      const copia = `https://pinpoint-code-slice.lovable.app/recibo/${token}`;
+      const txt = [pagado ? `*Recibo de pago - ${a.id}*` : `*Albarán - ${a.id}*`,
+        EMPRESA, `Local: ${local?.nombre ?? ""}`,
+        pagado ? `TOTAL COBRADO: ${euros(a.total)}` : `${a.tipo === "deposito" ? "TOTAL EN DEPÓSITO" : "TOTAL ENTREGADO"}: ${euros(a.lineas.reduce((s, l) => s + l.cantidad * PRECIO_DECIMO, 0))}`,
+        `Ver, descargar PDF o imprimir: ${copia}`].join("\n");
+      const destino = `https://wa.me/${telefono}?text=${encodeURIComponent(txt)}`;
+      if (tab) tab.location.href = destino;
+      else window.location.assign(destino);
+    } catch (err) {
+      tab?.close();
+      toast.error(err instanceof Error ? err.message : "No se pudo preparar el envío.");
+    } finally { setEnviando(false); }
+  };
+
+  const compartirPdf = async () => {
+    if (!pdf) return;
+    try { await navigator.share({ files: [new File([pdf], `${a.id}.pdf`, { type: "application/pdf" })], title: a.id }); }
+    catch (err) { if (!(err instanceof DOMException && err.name === "AbortError")) toast.error("No se pudo compartir el PDF. Descárgalo para adjuntarlo en WhatsApp."); }
   };
 
   const confirmarCobro = async () => {
@@ -137,7 +173,9 @@ function AlbaranPage() {
       <div className="no-print mt-6 grid gap-2 sm:grid-cols-3">
         <Button variant="secondary" size="lg" onClick={() => window.print()}>Imprimir albarán</Button>
         {!pagado && !cobrando && <Button size="lg" onClick={() => setCobrando(true)}>Saldar como cobrado</Button>}
-        <Button size="lg" variant="default" onClick={wa}>Enviar por WhatsApp</Button>
+        <Button size="lg" variant="default" disabled={enviando} onClick={wa}>{enviando ? "Preparando envío…" : "Enviar por WhatsApp"}</Button>
+        <Button size="lg" variant="secondary" disabled={!pdf} onClick={() => { if (pdf) descargarPdf(pdf, `${a.id}.pdf`); }}><Download />Descargar PDF</Button>
+        {puedeCompartir && <Button size="lg" variant="secondary" disabled={!pdf} onClick={compartirPdf}><Share2 />Compartir PDF</Button>}
       </div>
     </div>
   );
