@@ -97,6 +97,51 @@ export type Database = {
         }
         Relationships: []
       }
+      cierres_caja: {
+        Row: {
+          creado_por: string
+          dia: string
+          esperado_bizum: number
+          esperado_efectivo: number
+          esperado_tarjeta: number
+          fecha: string
+          id: string
+          notas: string
+          real_bizum: number
+          real_efectivo: number
+          real_tarjeta: number
+          usuario_id: string
+        }
+        Insert: {
+          creado_por: string
+          dia: string
+          esperado_bizum: number
+          esperado_efectivo: number
+          esperado_tarjeta: number
+          fecha?: string
+          id?: string
+          notas?: string
+          real_bizum: number
+          real_efectivo: number
+          real_tarjeta: number
+          usuario_id: string
+        }
+        Update: {
+          creado_por?: string
+          dia?: string
+          esperado_bizum?: number
+          esperado_efectivo?: number
+          esperado_tarjeta?: number
+          fecha?: string
+          id?: string
+          notas?: string
+          real_bizum?: number
+          real_efectivo?: number
+          real_tarjeta?: number
+          usuario_id?: string
+        }
+        Relationships: []
+      }
       decimos: {
         Row: {
           cantidad: number
@@ -132,6 +177,7 @@ export type Database = {
       }
       locales: {
         Row: {
+          codigo_cliente: number
           created_at: string
           direccion: string
           id: string
@@ -139,6 +185,7 @@ export type Database = {
           telefono: string
         }
         Insert: {
+          codigo_cliente?: number
           created_at?: string
           direccion?: string
           id: string
@@ -146,6 +193,7 @@ export type Database = {
           telefono?: string
         }
         Update: {
+          codigo_cliente?: number
           created_at?: string
           direccion?: string
           id?: string
@@ -153,6 +201,53 @@ export type Database = {
           telefono?: string
         }
         Relationships: []
+      }
+      pagos: {
+        Row: {
+          albaran_id: string
+          fecha: string
+          firma: string
+          historico: boolean
+          id: string
+          importe: number
+          metodo: string
+          nombre: string
+          solicitud: string | null
+          usuario_id: string | null
+        }
+        Insert: {
+          albaran_id: string
+          fecha?: string
+          firma?: string
+          historico?: boolean
+          id?: string
+          importe: number
+          metodo: string
+          nombre?: string
+          solicitud?: string | null
+          usuario_id?: string | null
+        }
+        Update: {
+          albaran_id?: string
+          fecha?: string
+          firma?: string
+          historico?: boolean
+          id?: string
+          importe?: number
+          metodo?: string
+          nombre?: string
+          solicitud?: string | null
+          usuario_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pagos_albaran_id_fkey"
+            columns: ["albaran_id"]
+            isOneToOne: false
+            referencedRelation: "albaranes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -198,6 +293,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cerrar_caja: {
+        Args: {
+          p_bizum: number
+          p_dia: string
+          p_efectivo: number
+          p_notas: string
+          p_tarjeta: number
+          p_usuario: string
+        }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -206,6 +312,17 @@ export type Database = {
         Returns: boolean
       }
       leer_copia_albaran: { Args: { p_hash: string }; Returns: Json }
+      registrar_cobro: {
+        Args: {
+          p_firma: string
+          p_id: string
+          p_importe: number
+          p_lineas: Json
+          p_metodo: string
+          p_solicitud: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "comercial"
