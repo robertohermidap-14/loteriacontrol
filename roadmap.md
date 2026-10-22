@@ -1,0 +1,5 @@
+- [ ] Compartir albaranes individuales sin inicio de sesión, sin exponer otros datos.
+- [ ] Descargar PDF, imprimir y compartir por WhatsApp del teléfono.
+- [ ] Mostrar entregados/cobrados con filtros de fecha, cliente y número.
+- [ ] Verificar el flujo y la privacidad.
+- Segunda fase acordada: cuentas individuales para locales.
