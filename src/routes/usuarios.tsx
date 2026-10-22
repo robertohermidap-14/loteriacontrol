@@ -15,6 +15,7 @@ export const Route = createFileRoute("/usuarios")({
       { title: "Usuarios · Gestión Lotería" },
       { name: "description", content: "Alta de comerciales y administradores." },
       { property: "og:title", content: "Usuarios · Gestión Lotería" },
+      { property: "og:description", content: "Alta de comerciales y administradores de Gestión Lotería." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },

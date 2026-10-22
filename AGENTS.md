@@ -9,4 +9,7 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 
-- Shared team data lives in Lovable Cloud tables (decimos, locales, albaranes) via src/lib/store.ts with realtime reload; access requires sign-in (signup disabled, any signed-in user sees all data) because it is an internal tool.
+- Shared team data lives in Lovable Cloud through src/lib/store.ts with realtime reload; existing RLS permits assigned admin/comercial roles because this is an internal tool.
+- Client copies use /recibo/$token outside AppShell, with random 256-bit capability tokens stored only as hashes in albaran_copias; a narrowly projected read-only RPC resolves one valid copy without granting anonymous table access.
+- WhatsApp uses validated international phone numbers and wa.me text links; optional PDF file sharing uses the device share sheet, never a Business API connector.
+- Receipt PDFs are generated from receipt data using pdf-lib, with page-aware layout and embedded signatures; the public copy has no settlement controls.

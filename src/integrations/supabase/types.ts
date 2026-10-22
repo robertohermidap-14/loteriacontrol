@@ -14,6 +14,41 @@ export type Database = {
   }
   public: {
     Tables: {
+      albaran_copias: {
+        Row: {
+          albaran_id: string
+          creado_at: string
+          creado_por: string
+          expires_at: string
+          id: string
+          token_hash: string
+        }
+        Insert: {
+          albaran_id: string
+          creado_at?: string
+          creado_por: string
+          expires_at?: string
+          id?: string
+          token_hash: string
+        }
+        Update: {
+          albaran_id?: string
+          creado_at?: string
+          creado_por?: string
+          expires_at?: string
+          id?: string
+          token_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "albaran_copias_albaran_id_fkey"
+            columns: ["albaran_id"]
+            isOneToOne: false
+            referencedRelation: "albaranes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       albaranes: {
         Row: {
           cobrado_por: string
@@ -170,6 +205,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      leer_copia_albaran: { Args: { p_hash: string }; Returns: Json }
     }
     Enums: {
       app_role: "admin" | "comercial"

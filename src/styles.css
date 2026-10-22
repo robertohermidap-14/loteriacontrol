@@ -101,7 +101,15 @@
 }
 
 @media print {
+  @page { size: A4; margin: 12mm; }
   .no-print { display: none !important; }
   body { background: white; color: black; }
   .print-sheet { background: white !important; color: black !important; border-color: #ccc !important; }
+  .print-sheet tr, .print-sheet section { break-inside: avoid; }
+  .print-sheet { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
 }
+
+.receipt-signature { background: var(--foreground); border-radius: var(--radius-sm); }
+.print-sheet table th, .print-sheet table td { padding-right: 12px; }
+.print-sheet table th:last-child, .print-sheet table td:last-child { padding-right: 0; }
+.print-sheet table th { white-space: nowrap; }
