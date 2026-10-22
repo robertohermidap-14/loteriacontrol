@@ -6,6 +6,7 @@ import {
   useRouter,
   HeadContent,
   Scripts,
+  useRouterState,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
@@ -120,11 +121,12 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const copiaCliente = useRouterState({ select: (s) => s.location.pathname.startsWith("/recibo/") });
 
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <AppShell><Outlet /></AppShell>
+      {copiaCliente ? <Outlet /> : <AppShell><Outlet /></AppShell>}
       <Toaster theme="dark" position="top-center" richColors />
     </QueryClientProvider>
   );
