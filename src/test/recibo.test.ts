@@ -1,4 +1,3 @@
-// @vitest-environment node
 import { describe, expect, it } from "vitest";
 import { telefonoWhatsApp, filtrarAlbaranes, hashToken, type Recibo } from "@/lib/recibo";
 import type { Albaran } from "@/lib/store";
@@ -34,7 +33,13 @@ describe("Copias y filtros de albaranes", () => {
     const r: Recibo = { ...a, localNombre: "Local prueba", localDireccion: "Ferrol" };
     const blob = await generarPdf(r);
     expect(blob.type).toBe("application/pdf");
-    const pdf = await PDFDocument.load(await blob.arrayBuffer());
+    const bytes = await new Promise<ArrayBuffer>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => reader.result instanceof ArrayBuffer ? resolve(reader.result) : reject(new Error("No PDF bytes"));
+      reader.onerror = reject;
+      reader.readAsArrayBuffer(blob);
+    });
+    const pdf = await PDFDocument.load(bytes);
     expect(pdf.getPageCount()).toBe(1);
   });
 });
