@@ -3,3 +3,8 @@
 - [x] Mostrar entregados/cobrados con filtros de fecha, cliente y número.
 - [x] Verificar lectura sin sesión, rechazo de enlace inválido, descarga PDF y filtros; envío final en WhatsApp no verificable desde el navegador de pruebas.
 - Segunda fase acordada: cuentas individuales para locales.
+- [ ] Corregir cobros parciales y permitir cobros sucesivos sin duplicar stock.
+- [ ] Numeración MHL con código de cliente, datos, QR y pendiente en pantalla/PDF/impresión.
+- [ ] Alta, asignación y venta por series completas o fracciones 1–10.
+- [ ] Caja diaria por usuario, métodos de pago y cierres; resúmenes generales solo admin.
+- [ ] Pruebas de reglas y verificación del flujo autenticado.
