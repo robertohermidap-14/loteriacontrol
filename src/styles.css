@@ -110,3 +110,6 @@
 }
 
 .receipt-signature { background: var(--foreground); border-radius: var(--radius-sm); }
+.print-sheet table th, .print-sheet table td { padding-right: 12px; }
+.print-sheet table th:last-child, .print-sheet table td:last-child { padding-right: 0; }
+.print-sheet table th { white-space: nowrap; }

@@ -1,5 +1,5 @@
-- [ ] Compartir albaranes individuales sin inicio de sesión, sin exponer otros datos.
-- [ ] Descargar PDF, imprimir y compartir por WhatsApp del teléfono.
-- [ ] Mostrar entregados/cobrados con filtros de fecha, cliente y número.
-- [ ] Verificar el flujo y la privacidad.
+- [x] Compartir albaranes individuales sin inicio de sesión, sin exponer otros datos.
+- [x] Descargar PDF, imprimir y preparar WhatsApp del teléfono; envío final en WhatsApp requiere confirmación del usuario.
+- [x] Mostrar entregados/cobrados con filtros de fecha, cliente y número.
+- [x] Verificar lectura sin sesión, rechazo de enlace inválido, descarga PDF y filtros; envío final en WhatsApp no verificable desde el navegador de pruebas.
 - Segunda fase acordada: cuentas individuales para locales.
