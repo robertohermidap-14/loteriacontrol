@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, it } from "vitest";
 import { telefonoWhatsApp, filtrarAlbaranes, hashToken, type Recibo } from "@/lib/recibo";
 import type { Albaran } from "@/lib/store";
