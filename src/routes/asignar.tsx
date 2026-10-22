@@ -51,7 +51,7 @@ function Asignar() {
       </div>
       <div className="space-y-2">
         {numeros.map((num) => {
-          const items = grupos.get(num)!;
+          const items = grupos.get(num) ?? [];
           const open = abierto === num;
           const elegidos = items.reduce((s, d) => s + (cant[d.id] ?? 0), 0);
           return (
@@ -64,6 +64,7 @@ function Asignar() {
               </button>
               {open && (
                 <div className="space-y-2 border-t border-border p-3">
+                  {[...new Set(items.map(d=>d.serie))].map(serie => <Button key={serie} variant="secondary" size="sm" onClick={() => setCant(prev=>({...prev,...Object.fromEntries(items.filter(d=>d.serie===serie).map(d=>[d.id,d.cantidad]))}))}>Seleccionar serie {serie} completa</Button>)}
                   {items.sort((a, b) => a.serie.localeCompare(b.serie, undefined, { numeric: true })).map((d) => (
                     <div key={d.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-lg bg-secondary/50 p-2">
                       <div className="min-w-0 text-sm">

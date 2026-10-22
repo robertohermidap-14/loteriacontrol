@@ -1,21 +1,24 @@
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import type { Recibo } from "@/lib/recibo";
+import QRCode from "qrcode";
+import { saldoAlbaran } from "@/lib/contabilidad";
 import { EMPRESA } from "@/lib/sesion";
 
 export async function generarPdf(r: Recibo): Promise<Blob> {
+  const saldo = saldoAlbaran(r);
   const pdf = await PDFDocument.create();
   const regular = await pdf.embedFont(StandardFonts.Helvetica);
   const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
   let page = pdf.addPage([595.28, 841.89]);
   let y = 790;
   const safe = (s: string) => Array.from(s).map((c) => { try { regular.encodeText(c); return c; } catch { return "?"; } }).join("");
-  const text = (value: string, size = 11, strong = false) => {
+  const text = (value: string, size = 11, strong = false, pendiente = false) => {
     const font = strong ? bold : regular;
     const words = safe(value).split(/\s+/);
     let line = "";
     const draw = () => {
       if (y < 65) { page = pdf.addPage([595.28, 841.89]); y = 790; }
-      page.drawText(line, { x: 40, y, size, font, color: rgb(0.12, 0.12, 0.12) });
+      page.drawText(line, { x: 40, y, size, font, color: pendiente ? rgb(0.8,0.1,0.1) : rgb(0.12, 0.12, 0.12) });
       y -= size + 8;
     };
     for (const word of words) {
@@ -27,16 +30,22 @@ export async function generarPdf(r: Recibo): Promise<Blob> {
   const money = (n: number) => `${n.toFixed(2)} EUR`;
   text(EMPRESA, 12, true);
   text(`${r.estado === "pagado" ? "RECIBO DE COBRO" : r.tipo === "deposito" ? "ALBARÁN DE DEPÓSITO" : "ALBARÁN DE ENTREGA"} · ${r.id}`, 17, true);
-  text(r.estado === "pagado" ? "COBRADO" : "PENDIENTE DE COBRO", 20, true);
+  text(saldo.texto, 20, true, saldo.estado!=="pagado");
   text(`Local: ${r.localNombre}`, 13, true);
   text(r.localDireccion);
+  text(`Cliente: ${r.codigoCliente ?? "—"} · Teléfono: ${r.localTelefono ?? "—"}`);
+  const qr = await pdf.embedPng(await QRCode.toDataURL(r.cobroUrl ?? `https://pinpoint-code-slice.lovable.app/albaran/${r.id}`,{margin:2,width:150}));
+  page.drawImage(qr,{x:445,y: y-105,width:100,height:100}); y-=115;
   text(`Entrega: ${new Date(r.fecha).toLocaleString("es-ES")}`);
   y -= 10;
   for (const l of r.lineas) {
     text(`${l.numero} · Serie ${l.serie || "—"} · Fracción ${l.fraccion || "—"}`, 12, true);
+    text(`Pendiente: ${money(Math.max(0,(l.cantidad-l.devueltos)*20-(saldo.debido ? r.total*(l.cantidad-l.devueltos)*20/saldo.debido:0)))}`,11,true,true);
     text(`Entregados: ${l.cantidad} · Devueltos: ${l.devueltos}${r.estado === "pagado" ? ` · Pagados: ${l.pagados}` : ""} · ${money((r.estado === "pagado" ? l.pagados : l.cantidad) * 20)}`);
   }
   text(`${r.estado === "pagado" ? "TOTAL COBRADO" : r.tipo === "deposito" ? "TOTAL EN DEPÓSITO" : "TOTAL ENTREGADO"}: ${money(r.estado === "pagado" ? r.total : r.lineas.reduce((sum, l) => sum + l.cantidad * 20, 0))}`, 16, true);
+  text(`TOTAL COBRADO: ${money(r.total)}`,14,true);
+  text(`PENDIENTE DE COBRO: ${money(saldo.pendiente)}`,16,true,true);
   const signature = async (label: string, src: string) => {
     text(label, 11, true);
     if (!src) return;
@@ -47,8 +56,8 @@ export async function generarPdf(r: Recibo): Promise<Blob> {
     page.drawImage(image, { x: 40, y: y - height, width: image.width * scale, height });
     y -= height + 18;
   };
-  if (r.receptorNombre) await signature(`Recoge: ${r.receptorNombre}`, r.firma);
-  if (r.estado === "pagado") {
+  if (r.receptorNombre) await signature(`Recoge: ${r.receptorNombre} · DNI: ${r.receptorDni ?? "—"}`, r.firma);
+  if (r.total > 0) {
     text(`Cobrado por: ${r.cobradoPor}`);
     text(`Fecha y hora del cobro: ${new Date(r.fechaPago ?? r.fecha).toLocaleString("es-ES")}`);
     await signature("Firma de quien cobra", r.firmaCobro);

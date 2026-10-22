@@ -3,6 +3,7 @@ import { useState } from "react";
 import { PageTitle } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { saldoAlbaran } from "@/lib/contabilidad";
 import { actions, euros, uid, useStore, type Local } from "@/lib/store";
 
 export const Route = createFileRoute("/locales")({
@@ -42,7 +43,7 @@ function Locales() {
             <div key={l.id} className="rounded-2xl border border-border bg-card p-4">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <h3 className="truncate text-lg font-semibold">{l.nombre}</h3>
+                  <h3 className="truncate text-lg font-semibold">{l.nombre}</h3><p className="text-xs text-muted-foreground">Cliente {String(l.codigoCliente ?? "").padStart(4,"0")}</p>
                   <p className="text-sm text-muted-foreground">{l.direccion} · {l.telefono}</p>
                 </div>
                 <div className="flex shrink-0 gap-1">
@@ -59,7 +60,7 @@ function Locales() {
                 {albaranes.filter((a) => a.localId === l.id).map((a) => (
                   <Link key={a.id} to="/albaran/$id" params={{ id: a.id }} className="flex justify-between rounded-lg border border-border px-2 py-1 text-sm hover:border-primary">
                     <span className="truncate">{a.tipo === "deposito" ? "Depósito" : "Entrega"} · {new Date(a.fecha).toLocaleDateString("es-ES")}{a.receptorNombre ? ` · ${a.receptorNombre}` : ""}</span>
-                    <span className={a.estado === "pagado" ? "text-accent" : "text-muted-foreground"}>{a.estado === "pagado" ? euros(a.total) : "Pendiente"}</span>
+                    <span className={saldoAlbaran(a).estado === "pagado" ? "text-accent" : "text-destructive"}>{`${saldoAlbaran(a).texto} · ${euros(saldoAlbaran(a).pendiente)} pendiente`}</span>
                   </Link>
                 ))}
               </div>

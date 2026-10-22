@@ -36,6 +36,13 @@
       "when": 1792656456962,
       "tag": "0004_copias_albaran_seguras",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792660188750,
+      "tag": "0005_cobros_parciales_y_caja",
+      "breakpoints": true
     }
   ]
 }

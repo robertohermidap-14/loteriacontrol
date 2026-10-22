@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AsignarRouteImport } from './routes/asignar'
+import { Route as CajaRouteImport } from './routes/caja'
 import { Route as CobroRouteImport } from './routes/cobro'
 import { Route as EscanerRouteImport } from './routes/escaner'
 import { Route as InventarioRouteImport } from './routes/inventario'
@@ -27,6 +28,11 @@ const IndexRoute = IndexRouteImport.update({
 const AsignarRoute = AsignarRouteImport.update({
   id: '/asignar',
   path: '/asignar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CajaRoute = CajaRouteImport.update({
+  id: '/caja',
+  path: '/caja',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CobroRoute = CobroRouteImport.update({
@@ -68,6 +74,7 @@ const ReciboTokenRoute = ReciboTokenRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/asignar': typeof AsignarRoute
+  '/caja': typeof CajaRoute
   '/cobro': typeof CobroRoute
   '/escaner': typeof EscanerRoute
   '/inventario': typeof InventarioRoute
@@ -79,6 +86,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/asignar': typeof AsignarRoute
+  '/caja': typeof CajaRoute
   '/cobro': typeof CobroRoute
   '/escaner': typeof EscanerRoute
   '/inventario': typeof InventarioRoute
@@ -91,6 +99,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/asignar': typeof AsignarRoute
+  '/caja': typeof CajaRoute
   '/cobro': typeof CobroRoute
   '/escaner': typeof EscanerRoute
   '/inventario': typeof InventarioRoute
@@ -104,6 +113,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/asignar'
+    | '/caja'
     | '/cobro'
     | '/escaner'
     | '/inventario'
@@ -115,6 +125,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/asignar'
+    | '/caja'
     | '/cobro'
     | '/escaner'
     | '/inventario'
@@ -126,6 +137,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/asignar'
+    | '/caja'
     | '/cobro'
     | '/escaner'
     | '/inventario'
@@ -138,6 +150,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AsignarRoute: typeof AsignarRoute
+  CajaRoute: typeof CajaRoute
   CobroRoute: typeof CobroRoute
   EscanerRoute: typeof EscanerRoute
   InventarioRoute: typeof InventarioRoute
@@ -161,6 +174,13 @@ declare module '@tanstack/react-router' {
       path: '/asignar'
       fullPath: '/asignar'
       preLoaderRoute: typeof AsignarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/caja': {
+      id: '/caja'
+      path: '/caja'
+      fullPath: '/caja'
+      preLoaderRoute: typeof CajaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cobro': {
@@ -218,6 +238,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AsignarRoute: AsignarRoute,
+  CajaRoute: CajaRoute,
   CobroRoute: CobroRoute,
   EscanerRoute: EscanerRoute,
   InventarioRoute: InventarioRoute,
