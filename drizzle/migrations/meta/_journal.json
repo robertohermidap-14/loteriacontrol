@@ -29,6 +29,13 @@
       "when": 1792608207642,
       "tag": "0003_restringir_politicas_por_rol",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792656456962,
+      "tag": "0004_copias_albaran_seguras",
+      "breakpoints": true
     }
   ]
 }
