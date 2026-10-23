@@ -108,7 +108,7 @@ function Index() {
                   <div key={num} className="rounded-xl border border-border bg-card">
                     <button className="flex w-full items-center gap-3 p-4 text-left" onClick={() => setAbierto(open ? null : num)}>
                       <span className="font-mono text-3xl font-bold tracking-wider text-primary">{num}</span>
-                      <span className="flex-1 text-sm text-muted-foreground">{items.length} {items.length === 1 ? "serie" : "series"}</span>
+                      <span className="flex-1 text-sm text-muted-foreground">{series(items).length} {series(items).length === 1 ? "serie" : "series"}</span>
                       <span className="text-xl font-semibold">{suma(items)} déc.</span>
                       <ChevronDown className={`h-5 w-5 transition-transform ${open ? "rotate-180" : ""}`} />
                     </button>
