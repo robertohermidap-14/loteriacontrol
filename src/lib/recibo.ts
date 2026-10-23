@@ -1,7 +1,7 @@
 import { saldoAlbaran } from "@/lib/contabilidad";
 import type { Albaran, Local } from "@/lib/store";
 
-export type Recibo = Pick<Albaran, "id" | "fecha" | "estado" | "tipo" | "lineas" | "total" | "fechaPago" | "receptorNombre" | "firma" | "cobradoPor" | "firmaCobro"> & { localNombre: string; localDireccion: string; localTelefono?: string; codigoCliente?: number; receptorDni?: string; cobroUrl?: string };
+export type Recibo = Pick<Albaran, "id" | "fecha" | "estado" | "tipo" | "lineas" | "total" | "fechaPago" | "receptorNombre" | "firma" | "cobradoPor" | "firmaCobro"> & { localNombre: string; localDireccion: string; localTelefono?: string | undefined; codigoCliente?: number | undefined; receptorDni?: string | undefined; cobroUrl?: string | undefined };
 export const reciboDeAlbaran = (a: Albaran, local?: Local): Recibo => ({ ...a, localNombre: local?.nombre ?? "", localDireccion: local?.direccion ?? "", localTelefono: local?.telefono, codigoCliente: local?.codigoCliente, cobroUrl: `https://pinpoint-code-slice.lovable.app/albaran/${a.id}` });
 
 export function telefonoWhatsApp(telefono: string) {
