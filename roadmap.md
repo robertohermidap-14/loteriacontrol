@@ -7,4 +7,7 @@
 - [ ] Numeración MHL con código de cliente, datos, QR y pendiente en pantalla/PDF/impresión.
 - [ ] Alta, asignación y venta por series completas o fracciones 1–10.
 - [ ] Caja diaria por usuario, métodos de pago y cierres; resúmenes generales solo admin.
-- [ ] Pruebas de reglas y verificación del flujo autenticado.
+- [ ] Pruebas de reglas y verificación del flujo autenticado.- [x] Terminaciones: series agrupadas, poner serie en venta y activar fracciones sueltas.
+- [x] Asignar: buscador de locales; números dentro del local.
+- [x] Admin: editar usuarios (teléfono, correo, código), logo y datos de facturación.
+- [x] App instalable en móviles (icono y pantalla completa).

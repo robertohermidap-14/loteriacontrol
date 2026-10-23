@@ -3,6 +3,7 @@ import { Grid3x3, ScanLine, Package, Store, Truck, Users, Wallet } from "lucide-
 import type { ReactNode } from "react";
 import { AuthGate, salir } from "@/components/AuthGate";
 import { useSesion } from "@/lib/sesion";
+import { useConfig } from "@/lib/config";
 
 const nav = [
   { to: "/", label: "Terminaciones", icon: Grid3x3 },
@@ -15,15 +16,22 @@ const nav = [
 ];
 
 export function AppShell({ children }: { children: ReactNode }) {
+  return <AuthGate><Shell>{children}</Shell></AuthGate>;
+}
+
+function Shell({ children }: { children: ReactNode }) {
   const sesion = useSesion();
-  const items = sesion.esAdmin ? [...nav, { to: "/usuarios", label: "Usuarios", icon: Users }] : nav;
+  const config = useConfig();
+  const items = sesion.esAdmin ? [...nav, { to: "/usuarios", label: "Admin", icon: Users }] : nav;
   return (
-    <AuthGate>
+    <>
     <div className="min-h-screen bg-background pb-24">
       <header className="no-print sticky top-0 z-20 border-b border-border bg-background/90 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3">
-          <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary font-mono text-lg font-bold text-primary-foreground">L</div>
-          <span className="flex-1 truncate font-semibold tracking-tight">Gestión Lotería</span>
+          {config?.logo
+            ? <img src={config.logo} alt="Logo" className="h-9 w-9 shrink-0 rounded-lg object-contain" />
+            : <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary font-mono text-lg font-bold text-primary-foreground">L</div>}
+          <span className="flex-1 truncate font-semibold tracking-tight">{config?.nombre || "Gestión Lotería"}</span>
           <button onClick={salir} className="shrink-0 text-sm text-muted-foreground hover:text-foreground">Salir</button>
         </div>
       </header>
@@ -40,7 +48,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </nav>
     </div>
-    </AuthGate>
+    </>
   );
 }
 

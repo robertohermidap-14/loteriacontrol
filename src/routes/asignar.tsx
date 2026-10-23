@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { PageTitle } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,6 +34,10 @@ function Asignar() {
   const [nombre, setNombre] = useState("");
   const [dni, setDni] = useState("");
   const [firma, setFirma] = useState("");
+  const [busca, setBusca] = useState("");
+  const local = locales.find((l) => l.id === localId);
+  const q = busca.trim().toLowerCase();
+  const filtrados = locales.filter((l) => !q || `${l.nombre} ${l.direccion} ${l.codigoCliente ?? ""}`.toLowerCase().includes(q));
   const total = Object.values(cant).reduce((s, n) => s + n, 0);
 
   const grupos = new Map<string, Decimo[]>();
@@ -42,12 +46,27 @@ function Asignar() {
 
   return (
     <>
-      <PageTitle sub="Elige el local y los décimos a entregar">Asignar lotería a local</PageTitle>
-      <div className="mb-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
-        {locales.map((l) => (
-          <Button key={l.id} variant={localId === l.id ? "default" : "secondary"} className="h-14 truncate" onClick={() => setLocalId(l.id)}>{l.nombre}</Button>
-        ))}
-        {!locales.length && <p className="col-span-full text-muted-foreground">Primero crea un local.</p>}
+      <PageTitle sub={local ? "Elige los números y series a entregar" : "Busca y elige el local"}>Asignar lotería a local</PageTitle>
+      {!local ? (
+        <div className="space-y-3">
+          <Input placeholder="Buscar local por nombre, código o dirección…" value={busca} onChange={(e) => setBusca(e.target.value)} />
+          <div className="space-y-2">
+            {filtrados.map((l) => (
+              <button key={l.id} onClick={() => { setLocalId(l.id); setCant({}); }} className="flex w-full items-center gap-3 rounded-xl border border-border bg-card p-4 text-left hover:border-primary">
+                {l.codigoCliente != null && <span className="font-mono text-sm text-primary">{l.codigoCliente}</span>}
+                <span className="flex-1 truncate font-semibold">{l.nombre}</span>
+                <span className="truncate text-sm text-muted-foreground">{l.direccion}</span>
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            ))}
+            {!locales.length && <p className="text-muted-foreground">Primero crea un local.</p>}
+            {!!locales.length && !filtrados.length && <p className="text-muted-foreground">Ningún local coincide.</p>}
+          </div>
+        </div>
+      ) : (<>
+      <div className="mb-4 flex items-center gap-3 rounded-xl border border-primary bg-card p-4">
+        <span className="flex-1 truncate text-lg font-semibold">{local.nombre}</span>
+        <Button variant="secondary" size="sm" onClick={() => { setLocalId(""); setCant({}); }}>Cambiar local</Button>
       </div>
       <div className="space-y-2">
         {numeros.map((num) => {
@@ -101,6 +120,7 @@ function Asignar() {
         onClick={async () => { const id = await actions.crearAlbaran(localId, Object.entries(cant).map(([decimoId, cantidad]) => ({ decimoId, cantidad })), { tipo, receptorNombre: nombre, receptorDni: dni, firma }); nav({ to: "/albaran/$id", params: { id } }); }}>
         Generar albarán {tipo === "deposito" ? "de depósito " : ""}({total} décimos)
       </Button>
+      </>)}
     </>
   );
 }

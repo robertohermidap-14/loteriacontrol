@@ -43,6 +43,13 @@
       "when": 1792660188750,
       "tag": "0005_cobros_parciales_y_caja",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792748084903,
+      "tag": "0006_perfiles_y_configuracion",
+      "breakpoints": true
     }
   ]
 }
