@@ -142,6 +142,42 @@ export type Database = {
         }
         Relationships: []
       }
+      configuracion: {
+        Row: {
+          direccion: string
+          email: string
+          id: number
+          logo: string
+          nif: string
+          nombre: string
+          razon_social: string
+          telefono: string
+          updated_at: string
+        }
+        Insert: {
+          direccion?: string
+          email?: string
+          id?: number
+          logo?: string
+          nif?: string
+          nombre?: string
+          razon_social?: string
+          telefono?: string
+          updated_at?: string
+        }
+        Update: {
+          direccion?: string
+          email?: string
+          id?: number
+          logo?: string
+          nif?: string
+          nombre?: string
+          razon_social?: string
+          telefono?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       decimos: {
         Row: {
           cantidad: number
@@ -252,21 +288,27 @@ export type Database = {
       profiles: {
         Row: {
           apellidos: string
+          codigo: string
           created_at: string
           id: string
           nombre: string
+          telefono: string
         }
         Insert: {
           apellidos?: string
+          codigo?: string
           created_at?: string
           id: string
           nombre?: string
+          telefono?: string
         }
         Update: {
           apellidos?: string
+          codigo?: string
           created_at?: string
           id?: string
           nombre?: string
+          telefono?: string
         }
         Relationships: []
       }
