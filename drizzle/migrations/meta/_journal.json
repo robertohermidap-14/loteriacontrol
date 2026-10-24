@@ -50,6 +50,13 @@
       "when": 1792748084903,
       "tag": "0006_perfiles_y_configuracion",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792838456367,
+      "tag": "0007_loterias_clientes_documentos",
+      "breakpoints": true
     }
   ]
 }

@@ -60,6 +60,7 @@ export type Database = {
           id: string
           lineas: Json
           local_id: string
+          loteria: string
           receptor_dni: string
           receptor_nombre: string
           tipo: string
@@ -75,6 +76,7 @@ export type Database = {
           id: string
           lineas?: Json
           local_id: string
+          loteria?: string
           receptor_dni?: string
           receptor_nombre?: string
           tipo?: string
@@ -90,6 +92,7 @@ export type Database = {
           id?: string
           lineas?: Json
           local_id?: string
+          loteria?: string
           receptor_dni?: string
           receptor_nombre?: string
           tipo?: string
@@ -142,6 +145,54 @@ export type Database = {
         }
         Relationships: []
       }
+      cierres_loteria: {
+        Row: {
+          creado_por: string
+          dia: string
+          esperado_bizum: number
+          esperado_efectivo: number
+          esperado_tarjeta: number
+          fecha: string
+          id: string
+          loteria: string
+          notas: string
+          real_bizum: number
+          real_efectivo: number
+          real_tarjeta: number
+          usuario_id: string
+        }
+        Insert: {
+          creado_por: string
+          dia: string
+          esperado_bizum: number
+          esperado_efectivo: number
+          esperado_tarjeta: number
+          fecha?: string
+          id?: string
+          loteria?: string
+          notas?: string
+          real_bizum: number
+          real_efectivo: number
+          real_tarjeta: number
+          usuario_id: string
+        }
+        Update: {
+          creado_por?: string
+          dia?: string
+          esperado_bizum?: number
+          esperado_efectivo?: number
+          esperado_tarjeta?: number
+          fecha?: string
+          id?: string
+          loteria?: string
+          notas?: string
+          real_bizum?: number
+          real_efectivo?: number
+          real_tarjeta?: number
+          usuario_id?: string
+        }
+        Relationships: []
+      }
       configuracion: {
         Row: {
           direccion: string
@@ -185,6 +236,7 @@ export type Database = {
           estado: string
           fraccion: string
           id: string
+          loteria: string
           numero: string
           serie: string
           ubicacion: string
@@ -195,6 +247,7 @@ export type Database = {
           estado?: string
           fraccion?: string
           id: string
+          loteria?: string
           numero: string
           serie?: string
           ubicacion?: string
@@ -205,6 +258,7 @@ export type Database = {
           estado?: string
           fraccion?: string
           id?: string
+          loteria?: string
           numero?: string
           serie?: string
           ubicacion?: string
@@ -216,24 +270,33 @@ export type Database = {
           codigo_cliente: number
           created_at: string
           direccion: string
+          dni: string
+          email: string
           id: string
           nombre: string
+          persona: string
           telefono: string
         }
         Insert: {
           codigo_cliente?: number
           created_at?: string
           direccion?: string
+          dni?: string
+          email?: string
           id: string
           nombre: string
+          persona?: string
           telefono?: string
         }
         Update: {
           codigo_cliente?: number
           created_at?: string
           direccion?: string
+          dni?: string
+          email?: string
           id?: string
           nombre?: string
+          persona?: string
           telefono?: string
         }
         Relationships: []
@@ -246,6 +309,7 @@ export type Database = {
           historico: boolean
           id: string
           importe: number
+          loteria: string
           metodo: string
           nombre: string
           solicitud: string | null
@@ -258,6 +322,7 @@ export type Database = {
           historico?: boolean
           id?: string
           importe: number
+          loteria?: string
           metodo: string
           nombre?: string
           solicitud?: string | null
@@ -270,6 +335,7 @@ export type Database = {
           historico?: boolean
           id?: string
           importe?: number
+          loteria?: string
           metodo?: string
           nombre?: string
           solicitud?: string | null
@@ -340,6 +406,18 @@ export type Database = {
           p_bizum: number
           p_dia: string
           p_efectivo: number
+          p_notas: string
+          p_tarjeta: number
+          p_usuario: string
+        }
+        Returns: undefined
+      }
+      cerrar_caja_loteria: {
+        Args: {
+          p_bizum: number
+          p_dia: string
+          p_efectivo: number
+          p_loteria: string
           p_notas: string
           p_tarjeta: number
           p_usuario: string
