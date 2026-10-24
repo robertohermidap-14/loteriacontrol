@@ -4,7 +4,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 type Rol = "admin" | "comercial";
 type DatosUsuario = { email: string; nombre: string; apellidos: string; telefono: string; codigo: string; rol: Rol };
 type NuevoUsuario = DatosUsuario & { password: string };
-type EdicionUsuario = DatosUsuario & { id: string; password?: string };
+type EdicionUsuario = DatosUsuario & { id: string; password?: string | undefined };
 
 function validar<T extends DatosUsuario>(d: T): T {
   if (!d?.email?.includes("@")) throw new Error("Email no válido");
