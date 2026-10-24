@@ -3,6 +3,10 @@
 - [x] Mostrar entregados/cobrados con filtros de fecha, cliente y número.
 - [x] Verificar lectura sin sesión, rechazo de enlace inválido, descarga PDF y filtros; envío final en WhatsApp no verificable desde el navegador de pruebas.
 - Segunda fase acordada: cuentas individuales para locales.
+- [ ] Añadir logo y facturación a PDF, impresión y copias públicas.
+- [ ] Integrar Entregas y cobros dentro de Caja con dos vistas.
+- [ ] Editar datos completos de locales y generar QR imprimible.
+- [ ] Separar Navidad (datos actuales), Reyes y Nacional semanal con selector de entrada.
 - [ ] Corregir cobros parciales y permitir cobros sucesivos sin duplicar stock.
 - [ ] Numeración MHL con código de cliente, datos, QR y pendiente en pantalla/PDF/impresión.
 - [ ] Alta, asignación y venta por series completas o fracciones 1–10.
