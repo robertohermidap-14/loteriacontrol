@@ -35,7 +35,7 @@ function Inventario() {
   const [activando,setActivando]=useState<string|null>(null);
   const [progreso,setProgreso]=useState(0);
   const [activado,setActivado]=useState<string|null>(null);
-  const activar=async(key:string,items:Decimo[])=>{setActivando(key);setProgreso(0);setActivado(null);try{for(let i=0;i<items.length;i++){await actions.ponerEnVenta(items[i].id);setProgreso(i+1);}setActivado(key);toast.success("Series activadas para la venta");}catch(e){toast.error(e instanceof Error?e.message:"No se pudo activar");}finally{setActivando(null);}};
+  const activar=async(key:string,items:Decimo[])=>{setActivando(key);setProgreso(0);setActivado(null);try{for(let i=0;i<items.length;i++){await actions.ponerEnVenta(items[i].id,items[i].cantidad);setProgreso(i+1);}setActivado(key);toast.success("Series activadas para la venta");}catch(e){toast.error(e instanceof Error?e.message:"No se pudo activar");}finally{setActivando(null);}};
 
   const grupos = new Map<string, Decimo[]>();
   for (const d of decimos) if (d.numero.includes(q)) grupos.set(d.numero, [...(grupos.get(d.numero) ?? []), d]);
