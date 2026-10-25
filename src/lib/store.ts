@@ -20,9 +20,18 @@ let state: State = empty;
 const listeners = new Set<() => void>();
 const emit = () => listeners.forEach((l) => l());
 
+async function leerStockCompleto() {
+  const rows: Tables<"decimos">[]=[];
+  for(let offset=0;;offset+=1000){
+    const {data,error}=await supabase.from("decimos").select("*").gt("cantidad",0).order("id").range(offset,offset+999);
+    if(error)return {data:null,error};
+    rows.push(...(data ?? []));
+    if((data?.length ?? 0)<1000)return {data:rows,error:null};
+  }
+}
 export async function recargar() {
   const [d, l, a, p, c] = await Promise.all([
-    supabase.from("decimos").select("*"),
+    leerStockCompleto(),
     supabase.from("locales").select("*").order("nombre"),
     supabase.from("albaranes").select("*").order("fecha", { ascending: false }),
     supabase.from("pagos").select("*").order("fecha", {ascending:false}),
