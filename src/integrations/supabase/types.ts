@@ -416,6 +416,27 @@ export type Database = {
         }
         Relationships: []
       }
+      stock_solicitudes: {
+        Row: {
+          fecha: string
+          resultado: Json
+          solicitud: string
+          usuario_id: string
+        }
+        Insert: {
+          fecha?: string
+          resultado: Json
+          solicitud: string
+          usuario_id: string
+        }
+        Update: {
+          fecha?: string
+          resultado?: Json
+          solicitud?: string
+          usuario_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
@@ -488,6 +509,20 @@ export type Database = {
           p_usuario: string
         }
         Returns: undefined
+      }
+      entregar_stock: {
+        Args: {
+          p_deposito: Json
+          p_items: Json
+          p_local: string
+          p_loteria: string
+          p_solicitud: string
+        }
+        Returns: string
+      }
+      guardar_rangos_stock: {
+        Args: { p_loteria: string; p_numero: string; p_rangos: Json }
+        Returns: number
       }
       has_role: {
         Args: {
