@@ -3,6 +3,9 @@
 - [x] Mostrar entregados/cobrados con filtros de fecha, cliente y número.
 - [x] Verificar lectura sin sesión, rechazo de enlace inválido, descarga PDF y filtros; envío final en WhatsApp no verificable desde el navegador de pruebas.
 - Segunda fase acordada: cuentas individuales para locales.
+- [ ] Quitar pendiente de cobro de Stock y agrupar número → ubicación → series.
+- [ ] Seleccionar rangos/fracciones, activar/desactivar en bloque y asignar desde Stock de forma segura.
+- [ ] Corregir inicio/limpieza de cámara y comprobar cámara simulada, asignación y pantallas móvil/tablet.
 - [x] Sincronizar cantidades pagadas e importe de cada cobro; verificar saldo y devolución.
 - [x] Corregir dominio de QR y WhatsApp en pantalla y PDF.
 - [x] Simplificar diseño para stock de administración, depósitos y cobros.
