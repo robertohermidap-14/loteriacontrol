@@ -85,6 +85,11 @@ async function subStock(id: string, n: number) {
 const done = async <T,>(p: PromiseLike<T>) => { const r = await p; await recargar(); return r; };
 
 export const actions = {
+  venderNumero: (numero: string, solicitud: string) => done((async () => {
+    const {data,error}=await supabase.rpc("vender_decimo",{p_numero:numero,p_loteria:loteriaActual(),p_solicitud:solicitud});
+    if(error) throw new Error(error.message);
+    return data as {numero:string;serie:string;fraccion:string};
+  })()),
   altaDecimo: (d: Omit<Decimo, "id">) => done(addStock(d)),
   altaBloque: (items: Omit<Decimo, "id">[]) => done((async () => { for (const d of items) await addStock(d); })()),
   ponerEnVenta: (id: string, cantidad?: number) => done((async () => {
