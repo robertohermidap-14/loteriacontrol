@@ -16,3 +16,6 @@
 - [x] Asignar: buscador de locales; números dentro del local.
 - [x] Admin: editar usuarios (teléfono, correo, código), logo y datos de facturación.
 - [x] App instalable en móviles (icono y pantalla completa).
+- [ ] Inventario: selector de rango táctil, listas virtualizadas y progreso de activación masiva.
+- [ ] Locales: mostrar nombre y números; desplegar ficha completa al tocar.
+- [ ] Confirmar devoluciones sin cobro adicional y regenerar el PDF actualizado.
