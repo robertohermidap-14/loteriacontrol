@@ -1,5 +1,5 @@
 import { describe,it,expect } from "vitest";
-import { liquidacionValida, saldoAlbaran, pagosVisibles, sumarMetodos, diferenciaCaja, codigoAlbaran, diaMadrid, type PagoCaja } from "@/lib/contabilidad";
+import { liquidacionValida, saldoAlbaran, pagosVisibles, sumarMetodos, diferenciaCaja, codigoAlbaran, diaMadrid, stockLocales, type PagoCaja } from "@/lib/contabilidad";
 import { crearEntrada } from "@/lib/fracciones";
 describe("Reglas de lotería y caja",()=>{
  it("el ejemplo de 360 de 400 queda parcial y con 40 pendientes",()=>{expect(saldoAlbaran({total:360,lineas:[{cantidad:10,devueltos:0},{cantidad:10,devueltos:0}]})).toMatchObject({estado:"parcial",pendiente:40});});
