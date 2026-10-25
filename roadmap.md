@@ -7,15 +7,15 @@
 - [x] Integrar Entregas y cobros dentro de Caja con dos vistas; enlace anterior redirige correctamente.
 - [x] Editar datos completos de locales y generar QR imprimible; guardado y lectura en pantalla verificados.
 - [x] Separar Navidad (datos actuales), Reyes y Nacional semanal con selector de entrada; listados comprobados con sesión.
-- [ ] Corregir cobros parciales y permitir cobros sucesivos sin duplicar stock.
-- [ ] Numeración MHL con código de cliente, datos, QR y pendiente en pantalla/PDF/impresión.
-- [ ] Alta, asignación y venta por series completas o fracciones 1–10.
-- [ ] Caja diaria por usuario, métodos de pago y cierres; resúmenes generales solo admin.
+- [x] Corregir cobros parciales y permitir cobros sucesivos sin duplicar stock.
+- [x] Numeración MHL con código de cliente, datos, QR y pendiente en pantalla/PDF/impresión.
+- [x] Alta, asignación y venta por series completas o fracciones 1–10.
+- [x] Caja diaria por usuario, métodos de pago y cierres; resúmenes generales solo admin.
 - [x] Pruebas actuales: 21 aprobadas; Caja, PDF, edición de local, QR y separación por lotería verificados con sesión.
 - [x] Terminaciones: series agrupadas, poner serie en venta y activar fracciones sueltas.
 - [x] Asignar: buscador de locales; números dentro del local.
 - [x] Admin: editar usuarios (teléfono, correo, código), logo y datos de facturación.
 - [x] App instalable en móviles (icono y pantalla completa).
-- [ ] Inventario: selector de rango táctil, listas virtualizadas y progreso de activación masiva.
-- [ ] Locales: mostrar nombre y números; desplegar ficha completa al tocar.
-- [ ] Confirmar devoluciones sin cobro adicional y regenerar el PDF actualizado.
+- [x] Inventario: selector de rango táctil, listas virtualizadas (200 filas, 12 montadas) y progreso de activación masiva.
+- [x] Locales: mostrar nombre y números; desplegar ficha completa al tocar.
+- [x] Confirmar devoluciones sin cobro adicional y regenerar el PDF actualizado; comprobado con albarán temporal sin modificar ALB-3LZXHNOY.
