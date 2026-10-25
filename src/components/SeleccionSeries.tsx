@@ -10,7 +10,7 @@ import { agruparSeries, seleccionarRango, estadoSerie } from "@/lib/seleccion-st
 import { FRACCIONES } from "@/lib/fracciones";
 import type { Decimo } from "@/lib/store";
 
-export function SeleccionSeries({items, cantidades, onSeleccion, onEstado, soloLectura=false}: {items:Decimo[]; cantidades?:Record<string,number>; onSeleccion?:(items:Decimo[],seleccionar:boolean)=>void; onEstado?:(desde:number,hasta:number,fracciones:string[],estado:Decimo["estado"])=>void; soloLectura?:boolean}) {
+export function SeleccionSeries({items, cantidades, onSeleccion, onEstado, soloLectura=false}: {items:Decimo[]; cantidades?:Record<string,number> | undefined; onSeleccion?:((items:Decimo[],seleccionar:boolean)=>void) | undefined; onEstado?:((desde:number,hasta:number,fracciones:string[],estado:Decimo["estado"])=>void) | undefined; soloLectura?:boolean}) {
   const grupos=useMemo(()=>agruparSeries(items),[items]);
   const [desde,setDesde]=useState(grupos[0]?.serie || "1");
   const [hasta,setHasta]=useState("");
