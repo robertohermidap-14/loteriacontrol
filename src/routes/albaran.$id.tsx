@@ -10,7 +10,8 @@ import { actions, euros, getState, useStore, type Linea } from "@/lib/store";
 import { EMPRESA, nombreCobrador, useSesion } from "@/lib/sesion";
 import { crearEnlaceRecibo } from "@/lib/recibos.functions";
 import { reciboDeAlbaran, telefonoWhatsApp } from "@/lib/recibo";
-import { liquidacionValida, saldoAlbaran, type MetodoPago } from "@/lib/contabilidad";
+import { importePorPagados, liquidacionValida, saldoAlbaran, type MetodoPago } from "@/lib/contabilidad";
+import { enlaceCopia } from "@/lib/enlaces";
 import { descargarPdf, generarPdf } from "@/lib/recibo-pdf";
 import { Loader2 } from "lucide-react";
 import { useConfig } from "@/lib/config";
@@ -23,7 +24,7 @@ function AlbaranPage(){
  const saldo=saldoAlbaran(a);const recibo=reciboDeAlbaran(a,local,config);
  const saldoEditado=saldoAlbaran({...a,lineas});
  const devoluciones=lineas.reduce((s,l,i)=>s+l.devueltos-(a.lineas[i]?.devueltos ?? 0),0);
- const upd=(i:number,k:"pagados"|"devueltos",v:number)=>{const nuevas=lineas.map((l,j)=>j===i?{...l,[k]:Math.max(a.lineas[i]?.[k] ?? 0,Math.min(l.cantidad-l[k==="pagados"?"devueltos":"pagados"],Math.trunc(v)))}:l);setLineas(nuevas);if(k==="devueltos")setImporte(String(Math.min(Number(importe)||0,saldoAlbaran({...a,lineas:nuevas}).pendiente)));};
+ const upd=(i:number,k:"pagados"|"devueltos",v:number)=>{const nuevas=lineas.map((l,j)=>j===i?{...l,[k]:Math.max(a.lineas[i]?.[k] ?? 0,Math.min(l.cantidad-l[k==="pagados"?"devueltos":"pagados"],Math.trunc(v)))}:l);setLineas(nuevas);setImporte(String(importePorPagados(a,nuevas)));};
  const cobrar=async()=>{setBusy(true);try{await actions.liquidar(a.id,lineas,{cobradoPor:nombreCobrador(sesion),firmaCobro:firma,importe:Number(importe),metodo,solicitud});setCobrando(false);setFirma("");const actualizado=getState().albaranes.find(x=>x.id===a.id);if(actualizado){try{descargarPdf(await generarPdf(reciboDeAlbaran(actualizado,local,config)),`${a.id}.pdf`);}catch{toast.error("Devolución guardada; vuelve a descargar el PDF");}}toast.success(devoluciones>0?"Devolución registrada; albarán actualizado":"Cobro registrado");}catch(err){toast.error(err instanceof Error?err.message:"No se pudo cobrar");}finally{setBusy(false)}};
  const wa=async()=>{let tel:string;try{tel=telefonoWhatsApp(local?.telefono ?? "")}catch(err){toast.error(err instanceof Error?err.message:"Teléfono inválido");return}const tab=window.open("about:blank","_blank");if(tab)tab.opener=null;setBusy(true);try{const {token}=await crearEnlaceRecibo({data:{id:a.id}});const txt=[`*${a.id} · ${saldo.texto}*`,EMPRESA,`Cliente: ${local?.nombre}`,`Cobrado: ${euros(a.total)}`,`Pendiente: ${euros(saldo.pendiente)}`,`Ver, descargar o imprimir: https://pinpoint-code-slice.lovable.app/recibo/${token}`].join("\n");const url=`https://wa.me/${tel}?text=${encodeURIComponent(txt)}`;if(tab)tab.location.href=url;else window.location.assign(url)}catch(err){tab?.close();toast.error(err instanceof Error?err.message:"No se pudo enviar")}finally{setBusy(false)}};
  return <><ReciboCliente recibo={recibo} /><div className="no-print mx-auto max-w-3xl px-4 pb-8"><div className="flex flex-wrap gap-2"><Button disabled={busy} onClick={wa}>Enviar por WhatsApp</Button><Button variant="secondary" onClick={async()=>{try{const blob=await generarPdf(recibo);const file=new File([blob],`${a.id}.pdf`,{type:"application/pdf"});if(navigator.canShare?.({files:[file]}))await navigator.share({files:[file]});else toast.error("Descarga el PDF para adjuntarlo en WhatsApp")}catch{toast.error("No se pudo compartir el PDF")}}}>Compartir PDF</Button>{saldo.pendiente>0 && !cobrando && <Button onClick={()=>{setCobrando(true);setSolicitud(crypto.randomUUID());setImporte(String(saldo.pendiente))}}>Cobro / devolución</Button>}</div>

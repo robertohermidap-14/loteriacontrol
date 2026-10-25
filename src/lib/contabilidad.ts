@@ -18,7 +18,7 @@ export function sumarMetodos(pagos: PagoCaja[]) {
 export const diferenciaCaja = (esperado: number, real: number) => Math.round((real-esperado)*100)/100;
 export const codigoAlbaran = (cliente: number, secuencia: number) => `MHL-${String(cliente).padStart(4,"0")}-${String(secuencia).padStart(6,"0")}`;
 export type StockLocal = { asignado: number; cobrado: number; disponible: number };
-/** Stock de un número en cada local: lo asignado menos lo ya cobrado en sus albaranes. La administración ("central") no aparece aquí. */
+/** Local stock is already decremented transactionally at settlement; never subtract payments twice. */
 export function stockLocales(
   decimos: { numero: string; ubicacion: string; cantidad: number }[],
   albaranes: { localId: string; lineas: { numero: string; pagados: number }[] }[],
@@ -36,11 +36,15 @@ export function stockLocales(
     if (!s) continue;
     for (const l of a.lineas) if (l.numero === numero) s.cobrado += l.pagados;
   }
-  for (const s of m.values()) s.disponible = Math.max(0, s.asignado - s.cobrado);
+  for (const s of m.values()) { s.disponible = Math.max(0, s.asignado); s.asignado += s.cobrado; }
   return m;
 }
 export function liquidacionValida(original: SaldoDocumento & {lineas: {cantidad:number;devueltos:number;pagados:number}[]}, lineas: {cantidad:number;devueltos:number;pagados:number}[], importe:number) {
  const devoluciones=lineas.reduce((s,l,i)=>s+l.devueltos-(original.lineas[i]?.devueltos ?? 0),0);
  const pendiente=saldoAlbaran({...original,lineas}).pendiente;
  return Number.isFinite(importe)&&importe>=0&&importe<=pendiente&&(importe>0 || (devoluciones>0 && lineas.every((l,i)=>l.pagados===original.lineas[i]?.pagados))) && original.total<=lineas.reduce((s,l)=>s+(l.cantidad-l.devueltos)*20,0);
+}
+export function importePorPagados(original: SaldoDocumento, lineas: {cantidad:number;devueltos:number;pagados:number}[]) {
+ const pagados = lineas.reduce((s,l)=>s+l.pagados*20,0);
+ return Math.max(0, Math.min(saldoAlbaran({...original,lineas}).pendiente, Math.round((pagados-original.total)*100)/100));
 }
