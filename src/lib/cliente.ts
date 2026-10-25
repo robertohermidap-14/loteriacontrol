@@ -1,0 +1,2 @@
+import type { Local } from "@/lib/store";
+export function qrCliente(l:Local){return JSON.stringify({tipo:"cliente-loteria",version:1,id:l.id,codigo:l.codigoCliente,nombre:l.nombre,persona:l.persona ?? "",dni:l.dni ?? "",direccion:l.direccion,telefono:l.telefono,email:l.email ?? ""});}
