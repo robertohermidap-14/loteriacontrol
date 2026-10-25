@@ -83,7 +83,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Gestión Lotería" },
       { name: "description", content: "Gestión interna de décimos y segundo canal." },
-      { name: "theme-color", content: "#1a2233" },
+      { name: "theme-color", content: "#f8faf9" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
@@ -128,7 +128,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       {copiaCliente ? <Outlet /> : <AppShell><Outlet /></AppShell>}
-      <Toaster theme="dark" position="top-center" richColors />
+      <Toaster theme="light" position="top-center" richColors />
     </QueryClientProvider>
   );
 }
