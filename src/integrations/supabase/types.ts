@@ -434,6 +434,33 @@ export type Database = {
         }
         Relationships: []
       }
+      ventas_escaneo: {
+        Row: {
+          fecha: string
+          loteria: string
+          numero: string
+          resultado: Json
+          solicitud: string
+          usuario_id: string
+        }
+        Insert: {
+          fecha?: string
+          loteria: string
+          numero: string
+          resultado: Json
+          solicitud: string
+          usuario_id: string
+        }
+        Update: {
+          fecha?: string
+          loteria?: string
+          numero?: string
+          resultado?: Json
+          solicitud?: string
+          usuario_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
