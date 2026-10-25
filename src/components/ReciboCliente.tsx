@@ -14,6 +14,7 @@ export function ReciboCliente({ recibo: r, controles = true }: { recibo: Recibo;
   const [error, setError] = useState("");
   useEffect(() => {
     let alive = true;
+    setPdf(null);setError("");
     generarPdf(r).then((b) => { if (alive) setPdf(b); }).catch(() => { if (alive) setError("No se pudo preparar el PDF. Puedes imprimir el albarán."); });
     return () => { alive = false; };
   }, [r]);

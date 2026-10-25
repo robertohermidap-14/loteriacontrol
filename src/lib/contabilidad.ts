@@ -17,3 +17,8 @@ export function sumarMetodos(pagos: PagoCaja[]) {
 }
 export const diferenciaCaja = (esperado: number, real: number) => Math.round((real-esperado)*100)/100;
 export const codigoAlbaran = (cliente: number, secuencia: number) => `MHL-${String(cliente).padStart(4,"0")}-${String(secuencia).padStart(6,"0")}`;
+export function liquidacionValida(original: SaldoDocumento & {lineas: {cantidad:number;devueltos:number;pagados:number}[]}, lineas: {cantidad:number;devueltos:number;pagados:number}[], importe:number) {
+ const devoluciones=lineas.reduce((s,l,i)=>s+l.devueltos-(original.lineas[i]?.devueltos ?? 0),0);
+ const pendiente=saldoAlbaran({...original,lineas}).pendiente;
+ return Number.isFinite(importe)&&importe>=0&&importe<=pendiente&&(importe>0 || (devoluciones>0 && lineas.every((l,i)=>l.pagados===original.lineas[i]?.pagados))) && original.total<=lineas.reduce((s,l)=>s+(l.cantidad-l.devueltos)*20,0);
+}
