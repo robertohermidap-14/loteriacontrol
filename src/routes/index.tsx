@@ -5,6 +5,7 @@ import { PageTitle } from "@/components/AppShell";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { actions, CENTRAL, nombreUbicacion, useStore, type Decimo, type Local } from "@/lib/store";
+import { stockLocales } from "@/lib/contabilidad";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -77,7 +78,7 @@ function SerieFila({ serie, ubicacion, items, locales }: Serie & { locales: Loca
 }
 
 function Index() {
-  const { decimos, locales } = useStore();
+  const { decimos, locales, albaranes } = useStore();
   const [t, setT] = useState<number | null>(null);
   const [abierto, setAbierto] = useState<string | null>(null);
 
