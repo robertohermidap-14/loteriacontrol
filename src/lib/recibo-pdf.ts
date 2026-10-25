@@ -4,6 +4,7 @@ import QRCode from "qrcode";
 import { saldoAlbaran } from "@/lib/contabilidad";
 import { EMPRESA } from "@/lib/sesion";
 import { LOTERIAS } from "@/lib/loteria";
+import { agruparLineas } from "@/lib/albaran-compacto";
 import { enlaceAlbaran } from "@/lib/enlaces";
 
 export async function generarPdf(r: Recibo): Promise<Blob> {
@@ -56,12 +57,14 @@ export async function generarPdf(r: Recibo): Promise<Blob> {
   page.drawImage(qr,{x:445,y: y-105,width:100,height:100}); y-=115;
   text(`Entrega: ${new Date(r.fecha).toLocaleString("es-ES")}`);
   y -= 10;
-  for (const l of r.lineas) {
-    text(`${l.numero} · Serie ${l.serie || "—"} · Fracción ${l.fraccion || "—"}`, 12, true);
-    text(`Pendiente: ${money(Math.max(0,(l.cantidad-l.devueltos)*20-(saldo.debido ? r.total*(l.cantidad-l.devueltos)*20/saldo.debido:0)))}`,11,true,true);
-    text(`Entregados: ${l.cantidad} · Devueltos: ${l.devueltos}${r.estado === "pagado" ? ` · Pagados: ${l.pagados}` : ""} · ${money((r.estado === "pagado" ? l.pagados : l.cantidad) * 20)}`);
+  for (const g of agruparLineas(r.lineas)) {
+    text(`${g.numero} · ${g.cantidad} décimos`, 12, true);
+    if(g.series)text(g.series,11);
+    for(const detalle of g.sueltas)text(detalle,9);
+    if(g.pagados || g.devueltos)text(`Pagados: ${g.pagados} · Devueltos: ${g.devueltos}`,10);
   }
-  text(`${r.estado === "pagado" ? "TOTAL COBRADO" : r.tipo === "deposito" ? "TOTAL EN DEPÓSITO" : "TOTAL ENTREGADO"}: ${money(r.estado === "pagado" ? r.total : r.lineas.reduce((sum, l) => sum + l.cantidad * 20, 0))}`, 16, true);
+  text(`Entrega: ${r.entregadoPor || "Sin identidad registrada en el albarán anterior"}`,10);
+  text(`${r.tipo === "deposito" ? "TOTAL EN DEPÓSITO" : "TOTAL ENTREGADO"}: ${money(r.lineas.reduce((sum, l) => sum + l.cantidad * 20, 0))}`, 16, true);
   text(`TOTAL COBRADO: ${money(r.total)}`,14,true);
   text(`PENDIENTE DE COBRO: ${money(saldo.pendiente)}`,16,true,true);
   const signature = async (label: string, src: string) => {

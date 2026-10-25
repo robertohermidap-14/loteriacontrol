@@ -8,6 +8,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { saldoAlbaran } from "@/lib/contabilidad";
 import { euros } from "@/lib/store";
 import { LOTERIAS } from "@/lib/loteria";
+import { agruparLineas } from "@/lib/albaran-compacto";
 import { enlaceAlbaran } from "@/lib/enlaces";
 
 export function ReciboCliente({ recibo: r, controles = true }: { recibo: Recibo; controles?: boolean }) {
@@ -41,11 +42,12 @@ export function ReciboCliente({ recibo: r, controles = true }: { recibo: Recibo;
         <p className={`mt-4 text-2xl font-extrabold ${paid ? "text-accent" : "text-destructive"}`}>{saldo.texto}</p>
       </header>
       <section><h2 className="text-xl font-bold">{r.localNombre}</h2><p className="text-muted-foreground">{r.localDireccion}</p><p className="mt-2">Entrega: {new Date(r.fecha).toLocaleString("es-ES")}</p></section>
-      <div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="border-b border-border text-left"><th className="py-3">Número / serie</th><th>Entregados</th><th>Devueltos</th><th>Pagados</th><th className="text-right">Importe</th><th className="text-right text-destructive">Pendiente</th></tr></thead><tbody>{r.lineas.map((l, i) => <tr key={i} className="border-b border-border"><td className="py-3"><b className="font-mono">{l.numero}</b><span className="block text-muted-foreground">{l.serie || "—"} / {l.fraccion || "—"}</span></td><td>{l.cantidad}</td><td>{l.devueltos}</td><td>{l.pagados}</td><td className="text-right whitespace-nowrap">{euros((paid ? l.pagados : l.cantidad) * 20)}</td><td className="text-right text-destructive">{euros(Math.max(0,(l.cantidad-l.devueltos)*20 - (saldo.debido ? r.total*(l.cantidad-l.devueltos)*20/saldo.debido : 0)))}</td></tr>)}</tbody></table></div>
+      <section className="space-y-3">{agruparLineas(r.lineas).map(g=><div key={g.numero} className="border-b border-border pb-3"><div className="flex justify-between gap-2"><b className="font-mono text-xl">{g.numero}</b><span>{g.cantidad} décimos</span></div>{g.series && <p className="text-sm">{g.series}</p>}{g.sueltas.map(x=><p key={x} className="text-xs text-muted-foreground">{x}</p>)}{(g.pagados>0 || g.devueltos>0) && <p className="text-sm">Pagados: {g.pagados} · Devueltos: {g.devueltos}</p>}</div>)}</section>
+      <p className="text-sm"><b>Entrega:</b> {r.entregadoPor || "Sin identidad registrada en el albarán anterior"}</p>
       <div className="flex flex-wrap justify-between gap-3 text-xl font-bold"><span>{r.tipo === "deposito" ? "TOTAL EN DEPÓSITO" : "TOTAL ENTREGADO"}</span><span>{euros(saldo.entregado)}</span></div>
       <div className="flex justify-between font-bold"><span>Total cobrado</span><span>{euros(r.total)}</span></div><div className="flex justify-between text-xl font-bold text-destructive"><span>Pendiente de cobro</span><span>{euros(saldo.pendiente)}</span></div>
       {r.receptorNombre && <section><p><b>Recoge:</b> {r.receptorNombre} · DNI: {r.receptorDni || "—"}</p>{r.firma && <img className="receipt-signature mt-3 h-24 max-w-full object-contain" src={r.firma} alt="Firma de quien recoge" />}</section>}
-      {r.total>0 && <section className="border-t border-border pt-5"><p><b>Cobrado por:</b> {r.cobradoPor}</p><p className="mt-2"><b>Fecha y hora:</b> {new Date(r.fechaPago ?? r.fecha).toLocaleString("es-ES")}</p>{r.firmaCobro && <img className="receipt-signature mt-3 h-24 max-w-full object-contain" src={r.firmaCobro} alt="Firma de quien cobra" />}</section>}
+      {(r.total>0 || r.firmaCobro) && <section className="border-t border-border pt-5"><p><b>Cobrado por:</b> {r.cobradoPor}</p><p className="mt-2"><b>Fecha y hora:</b> {new Date(r.fechaPago ?? r.fecha).toLocaleString("es-ES")}</p>{r.firmaCobro && <img className="receipt-signature mt-3 h-24 max-w-full object-contain" src={r.firmaCobro} alt="Firma de quien cobra" />}</section>}
     </article>
   </main>;
 }
