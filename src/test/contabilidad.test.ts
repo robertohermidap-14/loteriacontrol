@@ -13,4 +13,12 @@ describe("Reglas de lotería y caja",()=>{
  it("el administrador puede sumar todos los días y usuarios",()=>{expect(pagosVisibles([p,{...p,usuario_id:"otro"}],true,"u","2026-10-22")).toHaveLength(2);});
  it("separa efectivo tarjeta y bizum y calcula el descuadre",()=>{expect(sumarMetodos([p,{...p,importe:40,metodo:"tarjeta"},{...p,importe:60,metodo:"bizum"}])).toMatchObject({efectivo:20,tarjeta:40,bizum:60});expect(diferenciaCaja(120,115)).toBe(-5);});
  it("el día de caja usa la hora española",()=>{expect(diaMadrid("2026-10-21T22:30:00Z")).toBe("2026-10-22");});
+ it("el stock del local descuenta lo cobrado y excluye la administración",()=>{
+  const decimos=[{numero:"10000",ubicacion:"central",cantidad:50},{numero:"10000",ubicacion:"L1",cantidad:20},{numero:"10000",ubicacion:"L2",cantidad:10},{numero:"99999",ubicacion:"L1",cantidad:5}];
+  const albaranes=[{localId:"L1",lineas:[{numero:"10000",pagados:8},{numero:"99999",pagados:5}]}];
+  const m=stockLocales(decimos,albaranes,"10000");
+  expect(m.get("L1")).toEqual({asignado:20,cobrado:8,disponible:12});
+  expect(m.get("L2")).toEqual({asignado:10,cobrado:0,disponible:10});
+  expect(m.has("central")).toBe(false);
+ });
 });
