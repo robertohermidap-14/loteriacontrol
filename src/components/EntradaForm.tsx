@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SelectorFracciones } from "@/components/SelectorFracciones";
 import { crearEntrada, FRACCIONES } from "@/lib/fracciones";
 import { actions } from "@/lib/store";
+import { SelectorRangoSeries } from "@/components/SelectorRangoSeries";
+import { Loader2 } from "lucide-react";
 
 /** Alta de stock en recepción. Permite un bloque de series (desde–hasta) con N décimos por serie. */
 export function EntradaForm({ numero, onClose }: { numero: string; onClose: () => void }) {
@@ -20,7 +21,7 @@ export function EntradaForm({ numero, onClose }: { numero: string; onClose: () =
 
   return (
     <div className="fixed inset-0 z-30 grid place-items-center bg-background/80 p-4">
-      <form className="w-full max-w-sm space-y-3 rounded-2xl border border-border bg-card p-6"
+      <form className="max-h-[90dvh] w-full max-w-sm space-y-3 overflow-y-auto rounded-lg border border-border bg-card p-6"
         onSubmit={async (e) => {
           e.preventDefault();
           if (bloque > 500) { toast.error("Máximo 500 series por bloque"); return; }
@@ -28,13 +29,10 @@ export function EntradaForm({ numero, onClose }: { numero: string; onClose: () =
           try { await actions.altaBloque(crearEntrada(numero,a, hasta ? b : a,fracciones)); toast.success(`${numero}: +${total} décimos en recepción`); onClose(); } catch(err) { toast.error(err instanceof Error ? err.message : "No se pudo añadir"); } finally {setGuardando(false);}
         }}>
         <h2 className="text-lg font-semibold">Entrada del número <span className="font-mono text-primary">{numero}</span></h2>
-        <div className="grid grid-cols-2 gap-2">
-          <div><Label>Serie desde</Label><Input inputMode="numeric" value={desde} onChange={(e) => setDesde(e.target.value)} /></div>
-          <div><Label>Serie hasta</Label><Input inputMode="numeric" placeholder="(opcional)" value={hasta} onChange={(e) => setHasta(e.target.value)} /></div>
-        </div>
+        <SelectorRangoSeries desde={desde} hasta={hasta} onDesde={setDesde} onHasta={setHasta}/>
         <div><Label>Fracciones por serie</Label><SelectorFracciones value={fracciones} onChange={setFracciones} /></div>
         <p className="rounded-lg bg-secondary p-3 text-center text-lg font-semibold">Total: {total} décimos{bloque > 1 ? ` (${bloque} series)` : ""}</p>
-        <div className="flex gap-2 pt-2"><Button type="button" variant="secondary" className="flex-1" onClick={onClose}>Cancelar</Button><Button disabled={guardando || !fracciones.length || !desde} className="flex-1">Añadir al stock</Button></div>
+        <div className="flex flex-wrap gap-2 pt-2"><Button disabled={guardando} type="button" variant="secondary" className="flex-1" onClick={onClose}>Cancelar</Button><Button disabled={guardando || !fracciones.length || !desde} className="flex-1">{guardando && <Loader2 className="motion-safe:animate-spin"/>}{guardando?"Añadiendo…":"Añadir al stock"}</Button></div>
       </form>
     </div>
   );

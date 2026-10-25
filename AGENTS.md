@@ -21,3 +21,5 @@
 - Lottery selection partitions operational stock, receipts, payments and closures while client identities stay shared; payment classification derives from the receipt and closure totals are lottery-scoped.
 - Caja owns both balance and receipt-list views; /cobro redirects to its receipt view to preserve existing navigation.
 - Receipt DTOs carry administration branding and client contact fields through the capability-only RPC so anonymous PDF generation never reads internal configuration tables.
+- Long inventory detail lists use TanStack Virtual with measured rows to keep tablet scrolling bounded without losing controls.
+- Signed zero-money returns use the transactional settlement RPC and an idempotency audit table, never zero-value cash ledger rows; existing daily closure restrictions remain enforced.

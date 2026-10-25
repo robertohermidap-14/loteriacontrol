@@ -265,6 +265,44 @@ export type Database = {
         }
         Relationships: []
       }
+      liquidacion_solicitudes: {
+        Row: {
+          albaran_id: string
+          fecha: string
+          firma: string
+          importe: number
+          lineas: Json
+          solicitud: string
+          usuario_id: string
+        }
+        Insert: {
+          albaran_id: string
+          fecha?: string
+          firma: string
+          importe: number
+          lineas: Json
+          solicitud: string
+          usuario_id: string
+        }
+        Update: {
+          albaran_id?: string
+          fecha?: string
+          firma?: string
+          importe?: number
+          lineas?: Json
+          solicitud?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "liquidacion_solicitudes_albaran_id_fkey"
+            columns: ["albaran_id"]
+            isOneToOne: false
+            referencedRelation: "albaranes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       locales: {
         Row: {
           codigo_cliente: number

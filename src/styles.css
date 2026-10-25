@@ -98,6 +98,7 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
   }
+  button { min-height: 48px; min-width: 48px; touch-action: manipulation; }
 }
 
 @media print {
