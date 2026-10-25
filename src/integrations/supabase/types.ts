@@ -52,6 +52,7 @@ export type Database = {
       albaranes: {
         Row: {
           cobrado_por: string
+          entregado_por: string
           estado: string
           fecha: string
           fecha_pago: string | null
@@ -68,6 +69,7 @@ export type Database = {
         }
         Insert: {
           cobrado_por?: string
+          entregado_por?: string
           estado?: string
           fecha?: string
           fecha_pago?: string | null
@@ -84,6 +86,7 @@ export type Database = {
         }
         Update: {
           cobrado_por?: string
+          entregado_por?: string
           estado?: string
           fecha?: string
           fecha_pago?: string | null

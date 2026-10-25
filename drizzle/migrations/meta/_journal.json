@@ -92,6 +92,13 @@
       "when": 1792928982802,
       "tag": "0012_stock_rangos_y_entregas_atomicas",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1792945342799,
+      "tag": "0013_identidad_entrega_albaran",
+      "breakpoints": true
     }
   ]
 }
