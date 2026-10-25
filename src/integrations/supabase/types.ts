@@ -481,6 +481,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      vender_decimo: {
+        Args: { p_loteria: string; p_numero: string; p_solicitud: string }
+        Returns: Json
+      }
     }
     Enums: {
       app_role: "admin" | "comercial"
