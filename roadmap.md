@@ -3,10 +3,10 @@
 - [x] Mostrar entregados/cobrados con filtros de fecha, cliente y número.
 - [x] Verificar lectura sin sesión, rechazo de enlace inválido, descarga PDF y filtros; envío final en WhatsApp no verificable desde el navegador de pruebas.
 - Segunda fase acordada: cuentas individuales para locales.
-- [ ] Sincronizar cantidades pagadas e importe de cada cobro; verificar saldo y devolución.
-- [ ] Corregir dominio de QR y WhatsApp en pantalla y PDF.
-- [ ] Simplificar diseño para stock de administración, depósitos y cobros.
-- [ ] Venta inmediata por cámara o lector láser, con stock seguro y actualizado.
+- [x] Sincronizar cantidades pagadas e importe de cada cobro; verificar saldo y devolución.
+- [x] Corregir dominio de QR y WhatsApp en pantalla y PDF.
+- [x] Simplificar diseño para stock de administración, depósitos y cobros.
+- [x] Venta inmediata por cámara o lector láser, con stock seguro y actualizado.
 - [x] Añadir logo y facturación a PDF, impresión y proyección de copias públicas; PDF descargado y logo verificado visualmente.
 - [x] Integrar Entregas y cobros dentro de Caja con dos vistas; enlace anterior redirige correctamente.
 - [x] Editar datos completos de locales y generar QR imprimible; guardado y lectura en pantalla verificados.
@@ -23,3 +23,5 @@
 - [x] Inventario: selector de rango táctil, listas virtualizadas (200 filas, 12 montadas) y progreso de activación masiva.
 - [x] Locales: mostrar nombre y números; desplegar ficha completa al tocar.
 - [x] Confirmar devoluciones sin cobro adicional y regenerar el PDF actualizado; comprobado con albarán temporal sin modificar ALB-3LZXHNOY.
+
+- Verificación: cobro de 160 € y devolución de 2 décimos dejó saldo 0, stock local 0 y devolución central 2; venta por entrada de lector redujo stock central de 2 a 1. Datos temporales eliminados. Cámara física y lector real pendientes de prueba en dispositivo.

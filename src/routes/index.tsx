@@ -5,6 +5,7 @@ import { PageTitle } from "@/components/AppShell";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { actions, CENTRAL, nombreUbicacion, useStore, type Decimo, type Local } from "@/lib/store";
+import { useSesion } from "@/lib/sesion";
 import { Input } from "@/components/ui/input";
 import { euros } from "@/lib/store";
 import { ListaVirtual } from "@/components/ListaVirtual";
@@ -82,6 +83,7 @@ function SerieFila({ serie, ubicacion, items, locales }: Serie & { locales: Loca
 
 function Index() {
  const {decimos,locales,albaranes,cargado}=useStore();
+ const sesion=useSesion();
  const [t,setT]=useState<number|null>(null);
  const [q,setQ]=useState("");
  const [abierto,setAbierto]=useState<string|null>(null);
@@ -97,7 +99,7 @@ function Index() {
   <div className="mb-7 grid grid-cols-2 gap-x-6 gap-y-4 border-y border-border py-5 sm:grid-cols-3">
    <div><p className="flex items-center gap-2 text-sm text-muted-foreground"><Package className="h-4 w-4"/>En administración</p><p className="mt-2 text-3xl font-bold">{suma(central)}<span className="ml-2 text-sm font-normal text-muted-foreground">décimos</span></p></div>
    <div><p className="flex items-center gap-2 text-sm text-muted-foreground"><Store className="h-4 w-4"/>En depósito</p><p className="mt-2 text-3xl font-bold">{suma(depositos)}<span className="ml-2 text-sm font-normal text-muted-foreground">décimos</span></p></div>
-   <div><p className="flex items-center gap-2 text-sm text-muted-foreground"><Wallet className="h-4 w-4"/>Pendiente de cobro</p><p className="mt-2 text-2xl font-bold text-destructive">{euros(pendiente)}</p></div>
+   {sesion.esAdmin && <div><p className="flex items-center gap-2 text-sm text-muted-foreground"><Wallet className="h-4 w-4"/>Pendiente de cobro</p><p className="mt-2 text-2xl font-bold text-destructive">{euros(pendiente)}</p></div>}
   </div>
   <div className="relative mb-4"><Search className="absolute left-3 top-4 h-4 w-4 text-muted-foreground"/><Input aria-label="Buscar número en stock" className="h-12 pl-10" placeholder="Buscar número…" inputMode="numeric" value={q} onChange={e=>setQ(e.target.value.replace(/\D/g,""))}/></div>
   <div className="mb-6 flex flex-wrap gap-2"><Button variant={t===null?"default":"secondary"} onClick={()=>setT(null)}>Todos</Button>{Array.from({length:10},(_,i)=><Button key={i} size="icon" className="font-mono text-lg" aria-label={`Terminación ${i}`} variant={t===i?"default":"secondary"} onClick={()=>{setT(i);setAbierto(null)}}>{i}</Button>)}</div>
@@ -105,7 +107,7 @@ function Index() {
   <div className="divide-y divide-border">{numeros.map(num=>{
    const items=grupos.get(num) ?? [];const centrales=items.filter(d=>d.ubicacion===CENTRAL);const porLocal=stockLocales(items,albaranes,num);const open=abierto===num;
    return <div key={num}><Button variant="ghost" className="h-auto w-full justify-start gap-3 rounded-none px-3 py-4 text-left" aria-expanded={open} onClick={()=>setAbierto(open?null:num)}><span className="font-mono text-2xl font-bold">{num}</span><span className="flex-1 text-sm font-normal text-muted-foreground">{porLocal.size>0?`${porLocal.size} locales`:"Administración"}</span><span className="text-xl font-bold">{suma(centrales)}</span><ChevronDown className={open?"rotate-180":""}/></Button>
-    {open && <div className="space-y-3 border-t border-border px-3 py-4"><p className="font-semibold">Administración · {suma(centrales)} décimos</p><ListaVirtual items={series(centrales)} getKey={s=>s.clave} render={s=><SerieFila {...s} locales={locales}/>}/>{[...porLocal].map(([id,stock])=><div key={id} className="flex flex-wrap items-center justify-between gap-2 border-l-2 border-primary bg-secondary/50 p-3"><span className="font-medium">{nombreUbicacion(id,locales)}</span><span className="font-bold">{stock.disponible} en depósito</span></div>)}<div className="flex flex-wrap gap-2"><Button asChild variant="outline"><Link to="/asignar">Entregar a un local</Link></Button><Button asChild variant="outline"><Link to="/caja" search={{vista:"albaranes"}}>Cobrar / devolver</Link></Button></div></div>}
+    {open && <div className="space-y-3 border-t border-border px-3 py-4"><p className="font-semibold">Administración · {suma(centrales)} décimos</p><ListaVirtual items={series(centrales)} getKey={s=>s.clave} render={s=><SerieFila {...s} locales={locales}/>}/>{[...porLocal].map(([id,stock])=><div key={id} className="flex flex-wrap items-center justify-between gap-2 border-l-2 border-primary bg-secondary/50 p-3"><span className="font-medium">{nombreUbicacion(id,locales)}</span><span className="font-bold">{stock.disponible} en depósito</span></div>)}<div className="flex flex-wrap gap-2"><Button asChild variant="outline"><Link to="/asignar">Entregar a un local</Link></Button><Button asChild variant="outline"><Link to="/caja" search={{vista:"cobros"}}>Cobrar / devolver</Link></Button></div></div>}
    </div>;
   })}</div>
   {!cargado && <p className="py-6 text-muted-foreground">Cargando stock…</p>}

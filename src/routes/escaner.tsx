@@ -37,7 +37,7 @@ function Escaner(){
   <PageTitle sub={`${stock} décimos disponibles para venta en administración`}>Venta por escaneo</PageTitle>
   <div className="mb-6 flex gap-2"><Button variant={modo==="venta"?"default":"secondary"} onClick={()=>{setModo("venta");setUltima(null)}}><ScanBarcode/>Vender décimo</Button><Button variant={modo==="entrada"?"default":"secondary"} onClick={()=>{setModo("entrada");setUltima(null)}}>Entrada de stock</Button></div>
   <section className="border-y border-border py-6">
-   <form className="flex flex-wrap gap-3" onSubmit={e=>{e.preventDefault();const code=manual;setManual("");void procesar(code)}}>
+   <form className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto]" onSubmit={e=>{e.preventDefault();const code=manual;setManual("");void procesar(code)}}>
     <Input ref={input} aria-label="Código de barras o número" autoFocus className="h-16 min-w-0 flex-1 font-mono text-xl" placeholder="Código de barras o número" value={manual} onChange={e=>setManual(e.target.value)} autoComplete="off"/>
     <Button className="h-16" disabled={busy || !manual} type="submit">{busy?<Loader2 className="motion-safe:animate-spin"/>:<ScanBarcode/>}{modo==="venta"?"Registrar venta":"Añadir stock"}</Button>
    </form>
