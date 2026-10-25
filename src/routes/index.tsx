@@ -5,6 +5,7 @@ import { PageTitle } from "@/components/AppShell";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { actions, CENTRAL, nombreUbicacion, useStore, type Decimo, type Local } from "@/lib/store";
+import { stockLocales } from "@/lib/contabilidad";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -77,7 +78,7 @@ function SerieFila({ serie, ubicacion, items, locales }: Serie & { locales: Loca
 }
 
 function Index() {
-  const { decimos, locales } = useStore();
+  const { decimos, locales, albaranes } = useStore();
   const [t, setT] = useState<number | null>(null);
   const [abierto, setAbierto] = useState<string | null>(null);
 
@@ -98,23 +99,38 @@ function Index() {
       </div>
       {t !== null && (
         <div className="mt-8">
-          <h2 className="mb-3 text-lg font-semibold">Terminados en {t} · {numeros.reduce((s, n) => s + suma(grupos.get(n)!), 0)} décimos</h2>
+          <h2 className="mb-3 text-lg font-semibold">Terminados en {t} · {numeros.reduce((s, n) => s + suma(grupos.get(n)!.filter((d) => d.ubicacion === CENTRAL)), 0)} décimos en administración</h2>
           {numeros.length === 0 ? <p className="text-muted-foreground">No hay números en stock con esta terminación.</p> : (
             <div className="space-y-2">
               {numeros.map((num) => {
                 const items = grupos.get(num)!;
+                const centrales = items.filter((d) => d.ubicacion === CENTRAL);
+                const porLocal = stockLocales(items, albaranes, num);
                 const open = abierto === num;
                 return (
                   <div key={num} className="rounded-xl border border-border bg-card">
                     <button className="flex w-full items-center gap-3 p-4 text-left" onClick={() => setAbierto(open ? null : num)}>
                       <span className="font-mono text-3xl font-bold tracking-wider text-primary">{num}</span>
-                      <span className="flex-1 text-sm text-muted-foreground">{series(items).length} {series(items).length === 1 ? "serie" : "series"}</span>
-                      <span className="text-xl font-semibold">{suma(items)} déc.</span>
+                      <span className="flex-1 text-sm text-muted-foreground">{series(centrales).length} {series(centrales).length === 1 ? "serie" : "series"} en administración{porLocal.size ? ` · ${porLocal.size} ${porLocal.size === 1 ? "local" : "locales"}` : ""}</span>
+                      <span className="text-xl font-semibold">{suma(centrales)} déc.</span>
                       <ChevronDown className={`h-5 w-5 transition-transform ${open ? "rotate-180" : ""}`} />
                     </button>
                     {open && (
-                      <div className="space-y-2 border-t border-border p-3">
-                        {series(items).map((s) => <SerieFila key={s.clave} {...s} locales={locales} />)}
+                      <div className="space-y-3 border-t border-border p-3">
+                        <p className="text-sm font-semibold">Administración · {suma(centrales)} disponibles</p>
+                        {series(centrales).map((s) => <SerieFila key={s.clave} {...s} locales={locales} />)}
+                        {porLocal.size > 0 && (
+                          <div className="space-y-1 pt-1">
+                            <p className="text-sm font-semibold">Locales asignados</p>
+                            {[...porLocal].map(([id, s]) => (
+                              <div key={id} className="flex flex-wrap items-center gap-2 rounded-lg bg-secondary/50 px-3 py-2 text-sm">
+                                <span className="min-w-0 flex-1 truncate font-medium">📍 {nombreUbicacion(id, locales)}</span>
+                                <span className="text-muted-foreground">Asignados {s.asignado} · Cobrados {s.cobrado}</span>
+                                <span className="font-bold">{s.disponible} disp.</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
