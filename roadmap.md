@@ -3,6 +3,10 @@
 - [x] Mostrar entregados/cobrados con filtros de fecha, cliente y número.
 - [x] Verificar lectura sin sesión, rechazo de enlace inválido, descarga PDF y filtros; envío final en WhatsApp no verificable desde el navegador de pruebas.
 - Segunda fase acordada: cuentas individuales para locales.
+- [ ] Sincronizar cantidades pagadas e importe de cada cobro; verificar saldo y devolución.
+- [ ] Corregir dominio de QR y WhatsApp en pantalla y PDF.
+- [ ] Simplificar diseño para stock de administración, depósitos y cobros.
+- [ ] Venta inmediata por cámara o lector láser, con stock seguro y actualizado.
 - [x] Añadir logo y facturación a PDF, impresión y proyección de copias públicas; PDF descargado y logo verificado visualmente.
 - [x] Integrar Entregas y cobros dentro de Caja con dos vistas; enlace anterior redirige correctamente.
 - [x] Editar datos completos de locales y generar QR imprimible; guardado y lectura en pantalla verificados.
