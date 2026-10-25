@@ -57,6 +57,13 @@
       "when": 1792838456367,
       "tag": "0007_loterias_clientes_documentos",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792916785248,
+      "tag": "0008_devoluciones_sin_cobro",
+      "breakpoints": true
     }
   ]
 }
