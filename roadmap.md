@@ -3,6 +3,8 @@
 - [x] Mostrar entregados/cobrados con filtros de fecha, cliente y número.
 - [x] Verificar lectura sin sesión, rechazo de enlace inválido, descarga PDF y filtros; envío final en WhatsApp no verificable desde el navegador de pruebas.
 - Segunda fase acordada: cuentas individuales para locales.
+- [ ] Revisar Stock sin pendiente de cobro, selección directa de series y entrega desde Administración.
+- [ ] Revisar inicio y lectura de cámara y comprobar pantallas móvil/tablet.
 - [x] Quitar pendiente de cobro de Stock y agrupar número → ubicación → series.
 - [x] Seleccionar rangos/fracciones, activar/desactivar en bloque y asignar desde Stock de forma segura; entrega temporal de 100 décimos verificada y datos retirados.
 - [x] Corregir inicio/limpieza de cámara y comprobar cámara simulada (96458), asignación y pantallas móvil/tablet sin desbordamiento; cámara física requiere comprobación en los dispositivos del equipo.

@@ -1,8 +1,16 @@
 import { describe, it, expect } from "vitest";
-import { agruparSeries, seleccionarRango, aplicarRangos, estadoSerie } from "@/lib/seleccion-stock";
+import { agruparSeries, seleccionarRango, aplicarRangos, estadoSerie, serieSeleccionada } from "@/lib/seleccion-stock";
 import { crearEntrada } from "@/lib/fracciones";
 const items = crearEntrada("96458", 1, 200, Array.from({length: 10}, (_, i) => String(i + 1))).map((d, i) => ({...d, id: String(i)}));
 describe("Selección táctil de stock", () => {
+  it("selecciona una serie completa de 10 fracciones sin seleccionar otra serie", () => {
+    const serie = seleccionarRango(items, 12, 12, Array.from({length:10}, (_,i)=>String(i+1)));
+    const cantidades = Object.fromEntries(serie.map(d=>[d.id,d.cantidad]));
+    expect(serieSeleccionada(serie,cantidades)).toBe(true);
+    expect(Object.values(cantidades).reduce((a,b)=>a+b,0)).toBe(10);
+    expect(serieSeleccionada(items.filter(d=>d.serie==="13"),cantidades)).toBe(false);
+    expect(serieSeleccionada(serie,{})).toBe(false);
+  });
   it("agrupa 2000 décimos en 200 series", () => { expect(agruparSeries(items)).toHaveLength(200); expect(agruparSeries(items)[0]?.items).toHaveLength(10); });
   it("selecciona las fracciones 1 y 2 de diez series", () => { expect(seleccionarRango(items, 11, 20, ["1", "2"])).toHaveLength(20); });
   it("activar un rango no altera otras series ni fracciones", () => { const r=aplicarRangos(items,[{desde:11,hasta:20,fracciones:["1","2"],estado:"venta"}]); expect(r.filter(d=>d.estado==="venta")).toHaveLength(20); expect(r.find(d=>d.serie==="11" && d.fraccion==="3")?.estado).toBe("recepcion"); });
