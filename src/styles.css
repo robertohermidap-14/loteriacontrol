@@ -42,6 +42,8 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-stock-partial: var(--stock-partial);
+  --color-stock-partial-foreground: var(--stock-partial-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
@@ -79,6 +81,8 @@
   --muted-foreground: oklch(0.48 0.015 160);
   --accent: oklch(0.44 0.12 155);
   --accent-foreground: oklch(0.99 0 0);
+  --stock-partial: oklch(0.9 0.12 80);
+  --stock-partial-foreground: oklch(0.3 0.04 65);
   --destructive: oklch(0.53 0.2 25);
   --destructive-foreground: oklch(0.99 0 0);
   --border: oklch(0.88 0.009 155);
