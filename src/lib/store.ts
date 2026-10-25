@@ -122,7 +122,7 @@ export const actions = {
   eliminarDecimo: (id: string) => done(supabase.from("decimos").delete().eq("id", id).then(() => {})),
   guardarLocal: (l: Local) => done(supabase.from("locales").upsert({id:l.id,nombre:l.nombre,direccion:l.direccion,telefono:l.telefono,persona:l.persona ?? "",dni:l.dni ?? "",email:l.email ?? ""}).then(({error}) => {if(error)throw new Error(error.message);})),
   eliminarLocal: (id: string) => done(supabase.from("locales").delete().eq("id", id).then(() => {})),
-  crearAlbaran: async (localId: string, items: { decimoId: string; cantidad: number }[], dep: Deposito = { tipo: "entrega", receptorNombre: "", receptorDni: "", firma: "" }, solicitud = crypto.randomUUID()): Promise<string> => {
+  crearAlbaran: async (localId: string, items: { decimoId: string; cantidad: number }[], dep: Deposito = { tipo: "entrega", receptorNombre: "", receptorDni: "", firma: "" }, solicitud: string = crypto.randomUUID()): Promise<string> => {
     const {data: creado,error} = await supabase.rpc("entregar_stock",{p_local:localId,p_loteria:loteriaActual(),p_items:items.filter(it=>it.cantidad>0) as unknown as Json,p_deposito:dep as unknown as Json,p_solicitud:solicitud});
     if(error || !creado) throw new Error(error?.message ?? "No se pudo crear el albarán");
     await recargar();
