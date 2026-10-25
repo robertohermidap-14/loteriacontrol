@@ -66,7 +66,7 @@ export function useStore(): State {
   const loteria=useLoteria() ?? "navidad";
   return useMemo(()=>({...s,decimos:deLoteria(s.decimos,loteria),albaranes:deLoteria(s.albaranes,loteria),pagos:deLoteria(s.pagos,loteria),cierres:deLoteria(s.cierres,loteria)}),[s,loteria]);
 }
-export const getState = () => state;
+export const getState = () => ({...state,decimos:deLoteria(state.decimos,loteriaActual()),albaranes:deLoteria(state.albaranes,loteriaActual()),pagos:deLoteria(state.pagos,loteriaActual()),cierres:deLoteria(state.cierres,loteriaActual())});
 export const uid = () => Math.random().toString(36).slice(2, 10).toUpperCase();
 
 async function addStock(d: Omit<Decimo, "id">) {
@@ -112,7 +112,7 @@ export const actions = {
        if (!d || (d.loteria ?? "navidad")!==loteriaActual() || it.cantidad <= 0) continue;
       const n = Math.min(it.cantidad, d.cantidad);
       await subStock(d.id, n);
-      await addStock({ numero: d.numero, serie: d.serie, fraccion: d.fraccion, cantidad: n, ubicacion: localId, estado: "venta" });
+      await addStock({ numero: d.numero, serie: d.serie, fraccion: d.fraccion, cantidad: n, ubicacion: localId, estado: "venta",loteria:d.loteria ?? "navidad" });
       lineas.push({ numero: d.numero, serie: d.serie, fraccion: d.fraccion, cantidad: n, devueltos: 0, pagados: 0 });
     }
     const {data: creado,error} = await supabase.from("albaranes").insert({ id, local_id: localId, lineas,loteria:loteriaActual(), tipo: dep.tipo, receptor_nombre: dep.receptorNombre, receptor_dni: dep.receptorDni, firma: dep.firma }).select("id").single();
