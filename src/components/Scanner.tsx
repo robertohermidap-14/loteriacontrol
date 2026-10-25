@@ -33,7 +33,7 @@ export function Scanner({ onScan, qrOnly = false }: { onScan: (text: string) => 
         scanner=s;
         const decoded=(text:string)=>{
           const now = Date.now();
-          if (text === last && now - lastT < 2500) return;
+          if (text === last && now - lastT < 1500) { lastT=now; return; }
           last = text; lastT = now;
           if(!cancelled)cb.current(text);
         };
