@@ -1,12 +1,12 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { PageTitle } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Firma } from "@/components/Firma";
-import { actions, CENTRAL, useStore, type Decimo } from "@/lib/store";
+import { SeleccionSeries } from "@/components/SeleccionSeries";
+import { EntregaStock } from "@/components/EntregaStock";
+import { CENTRAL, useStore, type Decimo } from "@/lib/store";
 
 export const Route = createFileRoute("/asignar")({
   head: () => ({
@@ -22,105 +22,8 @@ export const Route = createFileRoute("/asignar")({
   component: Asignar,
 });
 
-const suma = (l: Decimo[]) => l.reduce((s, d) => s + d.cantidad, 0);
-
 function Asignar() {
-  const { locales, decimos } = useStore();
-  const nav = useNavigate();
-  const [localId, setLocalId] = useState("");
-  const [cant, setCant] = useState<Record<string, number>>({});
-  const [abierto, setAbierto] = useState<string | null>(null);
-  const [tipo, setTipo] = useState<"entrega" | "deposito">("entrega");
-  const [nombre, setNombre] = useState("");
-  const [dni, setDni] = useState("");
-  const [firma, setFirma] = useState("");
-  const [busca, setBusca] = useState("");
-  const local = locales.find((l) => l.id === localId);
-  const q = busca.trim().toLowerCase();
-  const filtrados = locales.filter((l) => !q || `${l.nombre} ${l.direccion} ${l.codigoCliente ?? ""}`.toLowerCase().includes(q));
-  const total = Object.values(cant).reduce((s, n) => s + n, 0);
-
-  const grupos = new Map<string, Decimo[]>();
-  for (const d of decimos) if (d.ubicacion === CENTRAL) grupos.set(d.numero, [...(grupos.get(d.numero) ?? []), d]);
-  const numeros = [...grupos.keys()].sort();
-
-  return (
-    <>
-      <PageTitle sub={local ? "Elige los números y series a entregar" : "Busca y elige el local"}>Asignar lotería a local</PageTitle>
-      {!local ? (
-        <div className="space-y-3">
-          <Input placeholder="Buscar local por nombre, código o dirección…" value={busca} onChange={(e) => setBusca(e.target.value)} />
-          <div className="space-y-2">
-            {filtrados.map((l) => (
-              <button key={l.id} onClick={() => { setLocalId(l.id); setCant({}); }} className="flex w-full items-center gap-3 rounded-xl border border-border bg-card p-4 text-left hover:border-primary">
-                {l.codigoCliente != null && <span className="font-mono text-sm text-primary">{l.codigoCliente}</span>}
-                <span className="flex-1 truncate font-semibold">{l.nombre}</span>
-                <span className="truncate text-sm text-muted-foreground">{l.direccion}</span>
-                <ChevronRight className="h-5 w-5" />
-              </button>
-            ))}
-            {!locales.length && <p className="text-muted-foreground">Primero crea un local.</p>}
-            {!!locales.length && !filtrados.length && <p className="text-muted-foreground">Ningún local coincide.</p>}
-          </div>
-        </div>
-      ) : (<>
-      <div className="mb-4 flex items-center gap-3 rounded-xl border border-primary bg-card p-4">
-        <span className="flex-1 truncate text-lg font-semibold">{local.nombre}</span>
-        <Button variant="secondary" size="sm" onClick={() => { setLocalId(""); setCant({}); }}>Cambiar local</Button>
-      </div>
-      <div className="space-y-2">
-        {numeros.map((num) => {
-          const items = grupos.get(num) ?? [];
-          const open = abierto === num;
-          const elegidos = items.reduce((s, d) => s + (cant[d.id] ?? 0), 0);
-          return (
-            <div key={num} className="rounded-xl border border-border bg-card">
-              <button className="flex w-full items-center gap-3 p-3 text-left" onClick={() => setAbierto(open ? null : num)}>
-                <span className="font-mono text-2xl font-bold text-primary">{num}</span>
-                <span className="flex-1 text-sm text-muted-foreground">{items.length} {items.length === 1 ? "serie" : "series"} · Disp: {suma(items)}</span>
-                {elegidos > 0 && <span className="rounded-md bg-primary px-2 py-1 text-sm font-bold text-primary-foreground">{elegidos}</span>}
-                <ChevronDown className={`h-5 w-5 transition-transform ${open ? "rotate-180" : ""}`} />
-              </button>
-              {open && (
-                <div className="space-y-2 border-t border-border p-3">
-                  {[...new Set(items.map(d=>d.serie))].map(serie => <Button key={serie} variant="secondary" size="sm" onClick={() => setCant(prev=>({...prev,...Object.fromEntries(items.filter(d=>d.serie===serie).map(d=>[d.id,d.cantidad]))}))}>Seleccionar serie {serie} completa</Button>)}
-                  {items.sort((a, b) => a.serie.localeCompare(b.serie, undefined, { numeric: true })).map((d) => (
-                    <div key={d.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-lg bg-secondary/50 p-2">
-                      <div className="min-w-0 text-sm">
-                        Serie {d.serie || "—"} · Fracción {d.fraccion || "—"}
-                        {d.estado === "recepcion" && <span className="ml-2 rounded bg-muted px-1.5 py-0.5 text-xs font-semibold">RECEPCIÓN</span>}
-                        <span className="ml-2 text-muted-foreground">Disp: {d.cantidad}</span>
-                      </div>
-                      <Input type="number" min={0} max={d.cantidad} className="w-24" value={cant[d.id] ?? 0}
-                        onChange={(e) => setCant({ ...cant, [d.id]: Math.min(d.cantidad, Math.max(0, +e.target.value)) })} />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
-        {!numeros.length && <p className="text-muted-foreground">No hay stock en la Administración.</p>}
-      </div>
-      <div className="mt-6 grid grid-cols-2 gap-2">
-        <Button variant={tipo === "entrega" ? "default" : "secondary"} onClick={() => setTipo("entrega")}>Entrega</Button>
-        <Button variant={tipo === "deposito" ? "default" : "secondary"} onClick={() => setTipo("deposito")}>Depósito</Button>
-      </div>
-      {tipo === "deposito" && (
-        <div className="mt-4 space-y-3 rounded-2xl border border-border bg-card p-4">
-          <p className="text-sm text-muted-foreground">Fecha del depósito: <b>{new Date().toLocaleDateString("es-ES")}</b></p>
-          <div className="grid gap-2 sm:grid-cols-2">
-            <div><Label>Nombre de quien recoge</Label><Input value={nombre} onChange={(e) => setNombre(e.target.value)} /></div>
-            <div><Label>DNI</Label><Input value={dni} onChange={(e) => setDni(e.target.value.toUpperCase())} /></div>
-          </div>
-          <div><Label>Firma</Label><Firma onChange={setFirma} /></div>
-        </div>
-      )}
-      <Button size="lg" className="mt-6 h-14 w-full text-lg" disabled={!localId || !total || (tipo === "deposito" && (!nombre || !dni || !firma))}
-        onClick={async () => { const id = await actions.crearAlbaran(localId, Object.entries(cant).map(([decimoId, cantidad]) => ({ decimoId, cantidad })), { tipo, receptorNombre: nombre, receptorDni: dni, firma }); nav({ to: "/albaran/$id", params: { id } }); }}>
-        Generar albarán {tipo === "deposito" ? "de depósito " : ""}({total} décimos)
-      </Button>
-      </>)}
-    </>
-  );
+ const {locales,decimos}=useStore();const [localId,setLocalId]=useState("");const [busca,setBusca]=useState("");const [numero,setNumero]=useState<string|null>(null);const [cant,setCant]=useState<Record<string,number>>({});const local=locales.find(l=>l.id===localId);
+ const grupos=new Map<string,Decimo[]>();for(const d of decimos)if(d.ubicacion===CENTRAL && d.cantidad>0)grupos.set(d.numero,[...(grupos.get(d.numero) ?? []),d]);
+ return <><PageTitle>Asignar lotería a local</PageTitle>{!local?<><Input className="mb-4 h-12" placeholder="Buscar local…" value={busca} onChange={e=>setBusca(e.target.value)}/><div className="space-y-2">{locales.filter(l=>`${l.nombre} ${l.codigoCliente ?? ""}`.toLowerCase().includes(busca.toLowerCase())).map(l=><Button key={l.id} variant="outline" className="h-auto min-h-16 w-full justify-start gap-3 whitespace-normal py-3 text-left" onClick={()=>{setLocalId(l.id);setCant({});}}><span className="font-mono text-primary">{l.codigoCliente}</span><span className="flex-1">{l.nombre}</span><ChevronRight/></Button>)}{!locales.length && <p>No hay locales.</p>}</div></>:<><div className="mb-4 flex flex-wrap items-center justify-between gap-2 border-b border-border pb-4"><h2 className="text-xl font-semibold">{local.nombre}</h2><Button variant="outline" onClick={()=>{setLocalId("");setCant({});}}>Cambiar local</Button></div><div className="divide-y divide-border">{[...grupos].sort(([a],[b])=>a.localeCompare(b)).map(([num,items])=><section key={num}><Button variant="ghost" aria-expanded={numero===num} className="h-auto min-h-16 w-full justify-start gap-3 whitespace-normal text-left" onClick={()=>setNumero(numero===num?null:num)}><span className="font-mono text-2xl font-bold">{num}</span><span className="flex-1 text-sm">{new Set(items.map(d=>d.serie)).size} series · {items.reduce((s,d)=>s+d.cantidad,0)} décimos</span><span>{items.reduce((s,d)=>s+(cant[d.id] ?? 0),0)} seleccionados</span><ChevronDown/></Button>{numero===num && <div className="py-4"><SeleccionSeries items={items} cantidades={cant} onSeleccion={(d,v)=>setCant(c=>({...c,...Object.fromEntries(d.map(x=>[x.id,v?x.cantidad:0]))}))}/></div>}</section>)}</div>{!grupos.size && <p>No hay stock en administración.</p>}<EntregaStock local={local} cant={cant} onCancelar={()=>{setLocalId("");setCant({});}}/></>}</>;
 }

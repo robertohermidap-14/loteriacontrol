@@ -20,9 +20,18 @@ let state: State = empty;
 const listeners = new Set<() => void>();
 const emit = () => listeners.forEach((l) => l());
 
+async function leerStockCompleto() {
+  const rows: Tables<"decimos">[]=[];
+  for(let offset=0;;offset+=1000){
+    const {data,error}=await supabase.from("decimos").select("*").gt("cantidad",0).order("id").range(offset,offset+999);
+    if(error)return {data:null,error};
+    rows.push(...(data ?? []));
+    if((data?.length ?? 0)<1000)return {data:rows,error:null};
+  }
+}
 export async function recargar() {
   const [d, l, a, p, c] = await Promise.all([
-    supabase.from("decimos").select("*"),
+    leerStockCompleto(),
     supabase.from("locales").select("*").order("nombre"),
     supabase.from("albaranes").select("*").order("fecha", { ascending: false }),
     supabase.from("pagos").select("*").order("fecha", {ascending:false}),
@@ -85,6 +94,10 @@ async function subStock(id: string, n: number) {
 const done = async <T,>(p: PromiseLike<T>) => { const r = await p; await recargar(); return r; };
 
 export const actions = {
+  guardarRangos: (numero: string, rangos: import("@/lib/seleccion-stock").RangoStock[]) => done((async()=>{
+    const {error}=await supabase.rpc("guardar_rangos_stock",{p_numero:numero,p_loteria:loteriaActual(),p_rangos:rangos as unknown as Json});
+    if(error)throw new Error(error.message);
+  })()),
   venderNumero: (numero: string, solicitud: string) => done((async () => {
     const {data,error}=await supabase.rpc("vender_decimo",{p_numero:numero,p_loteria:loteriaActual(),p_solicitud:solicitud});
     if(error) throw new Error(error.message);
@@ -109,21 +122,11 @@ export const actions = {
   eliminarDecimo: (id: string) => done(supabase.from("decimos").delete().eq("id", id).then(() => {})),
   guardarLocal: (l: Local) => done(supabase.from("locales").upsert({id:l.id,nombre:l.nombre,direccion:l.direccion,telefono:l.telefono,persona:l.persona ?? "",dni:l.dni ?? "",email:l.email ?? ""}).then(({error}) => {if(error)throw new Error(error.message);})),
   eliminarLocal: (id: string) => done(supabase.from("locales").delete().eq("id", id).then(() => {})),
-  crearAlbaran: async (localId: string, items: { decimoId: string; cantidad: number }[], dep: Deposito = { tipo: "entrega", receptorNombre: "", receptorDni: "", firma: "" }): Promise<string> => {
-    const id = "ALB-" + uid();
-    const lineas: Linea[] = [];
-    for (const it of items) {
-      const d = state.decimos.find((x) => x.id === it.decimoId);
-       if (!d || (d.loteria ?? "navidad")!==loteriaActual() || it.cantidad <= 0) continue;
-      const n = Math.min(it.cantidad, d.cantidad);
-      await subStock(d.id, n);
-      await addStock({ numero: d.numero, serie: d.serie, fraccion: d.fraccion, cantidad: n, ubicacion: localId, estado: "venta",loteria:d.loteria ?? "navidad" });
-      lineas.push({ numero: d.numero, serie: d.serie, fraccion: d.fraccion, cantidad: n, devueltos: 0, pagados: 0 });
-    }
-    const {data: creado,error} = await supabase.from("albaranes").insert({ id, local_id: localId, lineas,loteria:loteriaActual(), tipo: dep.tipo, receptor_nombre: dep.receptorNombre, receptor_dni: dep.receptorDni, firma: dep.firma }).select("id").single();
+  crearAlbaran: async (localId: string, items: { decimoId: string; cantidad: number }[], dep: Deposito = { tipo: "entrega", receptorNombre: "", receptorDni: "", firma: "" }, solicitud: string = crypto.randomUUID()): Promise<string> => {
+    const {data: creado,error} = await supabase.rpc("entregar_stock",{p_local:localId,p_loteria:loteriaActual(),p_items:items.filter(it=>it.cantidad>0) as unknown as Json,p_deposito:dep as unknown as Json,p_solicitud:solicitud});
     if(error || !creado) throw new Error(error?.message ?? "No se pudo crear el albarán");
     await recargar();
-    return creado.id;
+    return creado;
   },
   liquidar: (id: string, lineas: Linea[], cobro: Cobro) => done((async () => {
     const {error} = await supabase.rpc("registrar_cobro",{p_id:id,p_lineas:lineas as unknown as Json,p_importe:cobro.importe,p_metodo:cobro.metodo,p_firma:cobro.firmaCobro,p_solicitud:cobro.solicitud});

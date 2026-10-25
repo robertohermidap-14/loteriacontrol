@@ -22,6 +22,9 @@
 - Caja owns both balance and receipt-list views; /cobro redirects to its receipt view to preserve existing navigation.
 - Receipt DTOs carry administration branding and client contact fields through the capability-only RPC so anonymous PDF generation never reads internal configuration tables.
 - Long inventory detail lists use TanStack Virtual with measured rows to keep tablet scrolling bounded without losing controls.
+- Stock and assignment share a virtualized series selector; range edits are staged locally and persisted by one role-checked RPC. Atomic delivery locks source rows and creates its receipt in the same transaction.
+- Read positive stock with stable paginated queries so API row limits cannot silently truncate large numbers; never infer individual fractions from legacy unspecified or textual ranges.
+- Camera scanner serializes startup/teardown, decodes through the cross-browser library, and offers device selection with a desktop fallback.
 - Signed zero-money returns use the transactional settlement RPC and an idempotency audit table, never zero-value cash ledger rows; existing daily closure restrictions remain enforced.
 
 - Use src/lib/enlaces.ts for every receipt and copy URL so shared documents always target the published app, never editor previews.

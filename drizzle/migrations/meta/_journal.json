@@ -85,6 +85,13 @@
       "when": 1792926759921,
       "tag": "0011_auditoria_ventas_escaneo",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1792928982802,
+      "tag": "0012_stock_rangos_y_entregas_atomicas",
+      "breakpoints": true
     }
   ]
 }
