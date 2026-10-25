@@ -116,6 +116,8 @@
 }
 
 .receipt-signature { background: var(--card); border-radius: var(--radius-sm); }
+.stock-actions { position: sticky; bottom: 80px; }
+@media (max-height: 700px) { .stock-actions { position: static; } }
 .print-sheet table th, .print-sheet table td { padding-right: 12px; }
 .print-sheet table th:last-child, .print-sheet table td:last-child { padding-right: 0; }
 .print-sheet table th { white-space: nowrap; }
