@@ -30,6 +30,7 @@ export function EntradaForm({ numero, onClose }: { numero: string; onClose: () =
         }}>
         <h2 className="text-lg font-semibold">Entrada del número <span className="font-mono text-primary">{numero}</span></h2>
         <SelectorRangoSeries desde={desde} hasta={hasta} onDesde={setDesde} onHasta={setHasta}/>
+        <div><Label>Bloques rápidos de series</Label><div className="mt-1 flex flex-wrap gap-2">{[1,5,10,15,20,50].map(n=><Button key={n} type="button" size="icon" className="h-12 w-12 font-mono text-lg" aria-label={`Bloque de ${n} series`} variant={bloque===n?"default":"secondary"} onClick={()=>{const inicio=Math.max(1,Number(desde)||1);setDesde(String(inicio));setHasta(n>1?String(inicio+n-1):"");}}>{n}</Button>)}</div></div>
         <div><Label>Fracciones por serie</Label><SelectorFracciones value={fracciones} onChange={setFracciones} /></div>
         <p className="rounded-lg bg-secondary p-3 text-center text-lg font-semibold">Total: {total} décimos{bloque > 1 ? ` (${bloque} series)` : ""}</p>
         <div className="flex flex-wrap gap-2 pt-2"><Button disabled={guardando} type="button" variant="secondary" className="flex-1" onClick={onClose}>Cancelar</Button><Button disabled={guardando || !fracciones.length || !desde} className="flex-1">{guardando && <Loader2 className="motion-safe:animate-spin"/>}{guardando?"Añadiendo…":"Añadir al stock"}</Button></div>
