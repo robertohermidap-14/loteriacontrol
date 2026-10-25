@@ -1,18 +1,21 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Search, ScanBarcode, Package, Store, Wallet } from "lucide-react";
 import { PageTitle } from "@/components/AppShell";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { actions, CENTRAL, nombreUbicacion, useStore, type Decimo, type Local } from "@/lib/store";
-import { stockLocales } from "@/lib/contabilidad";
+import { Input } from "@/components/ui/input";
+import { euros } from "@/lib/store";
+import { ListaVirtual } from "@/components/ListaVirtual";
+import { saldoAlbaran, stockLocales } from "@/lib/contabilidad";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Terminaciones · Gestión Lotería" },
+      { title: "Stock · Lotería Control" },
       { name: "description", content: "Busca décimos en stock por terminación y mira dónde están." },
-      { property: "og:title", content: "Terminaciones · Gestión Lotería" },
+      { property: "og:title", content: "Stock · Lotería Control" },
       { property: "og:description", content: "Busca décimos en stock por terminación y mira dónde están." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -78,68 +81,34 @@ function SerieFila({ serie, ubicacion, items, locales }: Serie & { locales: Loca
 }
 
 function Index() {
-  const { decimos, locales, albaranes } = useStore();
-  const [t, setT] = useState<number | null>(null);
-  const [abierto, setAbierto] = useState<string | null>(null);
-
-  const grupos = new Map<string, Decimo[]>();
-  if (t !== null) for (const d of decimos) if (d.numero.endsWith(String(t))) grupos.set(d.numero, [...(grupos.get(d.numero) ?? []), d]);
-  const numeros = [...grupos.keys()].sort();
-
-  return (
-    <>
-      <PageTitle sub="Pulsa una terminación para ver los números en stock">Panel de terminaciones</PageTitle>
-      <div className="grid grid-cols-5 gap-3">
-        {Array.from({ length: 10 }, (_, i) => (
-          <button key={i} onClick={() => { setT(i); setAbierto(null); }}
-            className={`aspect-square rounded-2xl border font-mono text-4xl font-bold transition sm:text-6xl ${t === i ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card hover:border-primary"}`}>
-            {i}
-          </button>
-        ))}
-      </div>
-      {t !== null && (
-        <div className="mt-8">
-          <h2 className="mb-3 text-lg font-semibold">Terminados en {t} · {numeros.reduce((s, n) => s + suma(grupos.get(n)!.filter((d) => d.ubicacion === CENTRAL)), 0)} décimos en administración</h2>
-          {numeros.length === 0 ? <p className="text-muted-foreground">No hay números en stock con esta terminación.</p> : (
-            <div className="space-y-2">
-              {numeros.map((num) => {
-                const items = grupos.get(num)!;
-                const centrales = items.filter((d) => d.ubicacion === CENTRAL);
-                const porLocal = stockLocales(items, albaranes, num);
-                const open = abierto === num;
-                return (
-                  <div key={num} className="rounded-xl border border-border bg-card">
-                    <button className="flex w-full items-center gap-3 p-4 text-left" onClick={() => setAbierto(open ? null : num)}>
-                      <span className="font-mono text-3xl font-bold tracking-wider text-primary">{num}</span>
-                      <span className="flex-1 text-sm text-muted-foreground">{series(centrales).length} {series(centrales).length === 1 ? "serie" : "series"} en administración{porLocal.size ? ` · ${porLocal.size} ${porLocal.size === 1 ? "local" : "locales"}` : ""}</span>
-                      <span className="text-xl font-semibold">{suma(centrales)} déc.</span>
-                      <ChevronDown className={`h-5 w-5 transition-transform ${open ? "rotate-180" : ""}`} />
-                    </button>
-                    {open && (
-                      <div className="space-y-3 border-t border-border p-3">
-                        <p className="text-sm font-semibold">Administración · {suma(centrales)} disponibles</p>
-                        {series(centrales).map((s) => <SerieFila key={s.clave} {...s} locales={locales} />)}
-                        {porLocal.size > 0 && (
-                          <div className="space-y-1 pt-1">
-                            <p className="text-sm font-semibold">Locales asignados</p>
-                            {[...porLocal].map(([id, s]) => (
-                              <div key={id} className="flex flex-wrap items-center gap-2 rounded-lg bg-secondary/50 px-3 py-2 text-sm">
-                                <span className="min-w-0 flex-1 truncate font-medium">📍 {nombreUbicacion(id, locales)}</span>
-                                <span className="text-muted-foreground">Asignados {s.asignado} · Cobrados {s.cobrado}</span>
-                                <span className="font-bold">{s.disponible} disp.</span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      )}
-    </>
-  );
+ const {decimos,locales,albaranes,cargado}=useStore();
+ const [t,setT]=useState<number|null>(null);
+ const [q,setQ]=useState("");
+ const [abierto,setAbierto]=useState<string|null>(null);
+ const disponibles=decimos.filter(d=>d.cantidad>0);
+ const central=disponibles.filter(d=>d.ubicacion===CENTRAL);
+ const depositos=disponibles.filter(d=>d.ubicacion!==CENTRAL);
+ const grupos=new Map<string,Decimo[]>();
+ for(const d of disponibles) if(d.numero.includes(q) && (t===null || d.numero.endsWith(String(t)))) grupos.set(d.numero,[...(grupos.get(d.numero) ?? []),d]);
+ const numeros=[...grupos.keys()].sort();
+ const pendiente=albaranes.reduce((s,a)=>s+saldoAlbaran(a).pendiente,0);
+ return <>
+  <div className="mb-6 flex flex-wrap items-center justify-between gap-3"><PageTitle>Control de stock</PageTitle><Button asChild><Link to="/escaner"><ScanBarcode/>Vender por escaneo</Link></Button></div>
+  <div className="mb-7 grid grid-cols-2 gap-x-6 gap-y-4 border-y border-border py-5 sm:grid-cols-3">
+   <div><p className="flex items-center gap-2 text-sm text-muted-foreground"><Package className="h-4 w-4"/>En administración</p><p className="mt-2 text-3xl font-bold">{suma(central)}<span className="ml-2 text-sm font-normal text-muted-foreground">décimos</span></p></div>
+   <div><p className="flex items-center gap-2 text-sm text-muted-foreground"><Store className="h-4 w-4"/>En depósito</p><p className="mt-2 text-3xl font-bold">{suma(depositos)}<span className="ml-2 text-sm font-normal text-muted-foreground">décimos</span></p></div>
+   <div><p className="flex items-center gap-2 text-sm text-muted-foreground"><Wallet className="h-4 w-4"/>Pendiente de cobro</p><p className="mt-2 text-2xl font-bold text-destructive">{euros(pendiente)}</p></div>
+  </div>
+  <div className="relative mb-4"><Search className="absolute left-3 top-4 h-4 w-4 text-muted-foreground"/><Input aria-label="Buscar número en stock" className="h-12 pl-10" placeholder="Buscar número…" inputMode="numeric" value={q} onChange={e=>setQ(e.target.value.replace(/\D/g,""))}/></div>
+  <div className="mb-6 flex flex-wrap gap-2"><Button variant={t===null?"default":"secondary"} onClick={()=>setT(null)}>Todos</Button>{Array.from({length:10},(_,i)=><Button key={i} size="icon" className="font-mono text-lg" aria-label={`Terminación ${i}`} variant={t===i?"default":"secondary"} onClick={()=>{setT(i);setAbierto(null)}}>{i}</Button>)}</div>
+  <div className="mb-2 grid grid-cols-[1fr_auto] border-b border-border px-3 pb-3 text-sm font-semibold text-muted-foreground"><span>Número / ubicación</span><span>Stock administración</span></div>
+  <div className="divide-y divide-border">{numeros.map(num=>{
+   const items=grupos.get(num) ?? [];const centrales=items.filter(d=>d.ubicacion===CENTRAL);const porLocal=stockLocales(items,albaranes,num);const open=abierto===num;
+   return <div key={num}><Button variant="ghost" className="h-auto w-full justify-start gap-3 rounded-none px-3 py-4 text-left" aria-expanded={open} onClick={()=>setAbierto(open?null:num)}><span className="font-mono text-2xl font-bold">{num}</span><span className="flex-1 text-sm font-normal text-muted-foreground">{porLocal.size>0?`${porLocal.size} locales`:"Administración"}</span><span className="text-xl font-bold">{suma(centrales)}</span><ChevronDown className={open?"rotate-180":""}/></Button>
+    {open && <div className="space-y-3 border-t border-border px-3 py-4"><p className="font-semibold">Administración · {suma(centrales)} décimos</p><ListaVirtual items={series(centrales)} getKey={s=>s.clave} render={s=><SerieFila {...s} locales={locales}/>}/>{[...porLocal].map(([id,stock])=><div key={id} className="flex flex-wrap items-center justify-between gap-2 border-l-2 border-primary bg-secondary/50 p-3"><span className="font-medium">{nombreUbicacion(id,locales)}</span><span className="font-bold">{stock.disponible} en depósito</span></div>)}<div className="flex flex-wrap gap-2"><Button asChild variant="outline"><Link to="/asignar">Entregar a un local</Link></Button><Button asChild variant="outline"><Link to="/caja">Cobrar / devolver</Link></Button></div></div>}
+   </div>;
+  })}</div>
+  {!cargado && <p className="py-6 text-muted-foreground">Cargando stock…</p>}
+  {cargado && !numeros.length && <p className="py-6 text-muted-foreground">No hay stock para esta búsqueda.</p>}
+ </>;
 }
