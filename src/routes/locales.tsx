@@ -1,73 +1,26 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { Pencil, Printer, Plus, X } from "lucide-react";
+import { toast } from "sonner";
+import { QRCodeSVG } from "qrcode.react";
 import { PageTitle } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { saldoAlbaran } from "@/lib/contabilidad";
 import { actions, euros, uid, useStore, type Local } from "@/lib/store";
-
-export const Route = createFileRoute("/locales")({
-  head: () => ({
-    meta: [
-      { title: "Locales · Gestión Lotería" },
-      { name: "description", content: "Bares y quioscos del segundo canal." },
-      { property: "og:title", content: "Locales · Gestión Lotería" },
-      { property: "og:description", content: "Bares y quioscos del segundo canal." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-    ],
-  }),
-  component: Locales,
-});
-
-const vacio: Local = { id: "", nombre: "", direccion: "", telefono: "" };
-
-function Locales() {
-  const { locales, decimos, albaranes } = useStore();
-  const [f, setF] = useState<Local>(vacio);
-
-  return (
-    <>
-      <PageTitle sub="Bares, quioscos y demás puntos de venta">Locales de segundo canal</PageTitle>
-      <form className="mb-6 grid gap-2 rounded-2xl border border-border bg-card p-4 sm:grid-cols-4"
-        onSubmit={(e) => { e.preventDefault(); if (!f.nombre) return; actions.guardarLocal({ ...f, id: f.id || uid() }); setF(vacio); }}>
-        <Input placeholder="Nombre" value={f.nombre} onChange={(e) => setF({ ...f, nombre: e.target.value })} />
-        <Input placeholder="Dirección" value={f.direccion} onChange={(e) => setF({ ...f, direccion: e.target.value })} />
-        <Input placeholder="Teléfono (ej. 34600111222)" inputMode="tel" value={f.telefono} onChange={(e) => setF({ ...f, telefono: e.target.value })} />
-        <Button>{f.id ? "Guardar cambios" : "Añadir local"}</Button>
-      </form>
-      <div className="grid gap-3 sm:grid-cols-2">
-        {locales.map((l) => {
-          const asig = decimos.filter((d) => d.ubicacion === l.id);
-          return (
-            <div key={l.id} className="rounded-2xl border border-border bg-card p-4">
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <h3 className="truncate text-lg font-semibold">{l.nombre}</h3><p className="text-xs text-muted-foreground">Cliente {String(l.codigoCliente ?? "").padStart(4,"0")}</p>
-                  <p className="text-sm text-muted-foreground">{l.direccion} · {l.telefono}</p>
-                </div>
-                <div className="flex shrink-0 gap-1">
-                  <Button size="sm" variant="secondary" onClick={() => setF(l)}>Editar</Button>
-                  <Button size="sm" variant="ghost" onClick={() => actions.eliminarLocal(l.id)}>Borrar</Button>
-                </div>
-              </div>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {asig.map((d) => <span key={d.id} className="rounded-md bg-secondary px-2 py-1 font-mono text-sm">{d.numero} ×{d.cantidad}</span>)}
-                {!asig.length && <span className="text-sm text-muted-foreground">Sin décimos asignados</span>}
-              </div>
-              <div className="mt-3 space-y-1">
-                <p className="text-xs uppercase tracking-wider text-muted-foreground">Albaranes</p>
-                {albaranes.filter((a) => a.localId === l.id).map((a) => (
-                  <Link key={a.id} to="/albaran/$id" params={{ id: a.id }} className="flex justify-between rounded-lg border border-border px-2 py-1 text-sm hover:border-primary">
-                    <span className="truncate">{a.tipo === "deposito" ? "Depósito" : "Entrega"} · {new Date(a.fecha).toLocaleDateString("es-ES")}{a.receptorNombre ? ` · ${a.receptorNombre}` : ""}</span>
-                    <span className={saldoAlbaran(a).estado === "pagado" ? "text-accent" : "text-destructive"}>{`${saldoAlbaran(a).texto} · ${euros(saldoAlbaran(a).pendiente)} pendiente`}</span>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </>
-  );
+import { qrCliente } from "@/lib/cliente";
+import { useConfig } from "@/lib/config";
+export const Route = createFileRoute("/locales")({head:()=>({meta:[{title:"Clientes y locales · Gestión Lotería"},{name:"description",content:"Datos de clientes, contactos, QR y albaranes de cada lotería."},{property:"og:title",content:"Clientes y locales · Gestión Lotería"},{property:"og:description",content:"Fichas de locales y sus asignaciones de lotería."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary"}]}),component:Locales});
+const vacio:Local={id:"",nombre:"",direccion:"",telefono:"",persona:"",dni:"",email:""};
+function Locales(){
+ const {locales,decimos,albaranes}=useStore();const config=useConfig();
+ const [f,setF]=useState<Local|null>(null);const [busqueda,setBusqueda]=useState("");const [qr,setQr]=useState<Local|null>(null);const [busy,setBusy]=useState(false);
+ const guardar=async()=>{if(!f)return;setBusy(true);try{await actions.guardarLocal({...f,nombre:f.nombre.trim(),email:f.email?.trim() ?? "",id:f.id || uid()});setF(null);toast.success("Cliente guardado");}catch(e){toast.error(e instanceof Error?e.message:"No se pudo guardar");}finally{setBusy(false);}};
+ return <>
+ <div className="no-print"><PageTitle>Clientes y locales</PageTitle><div className="mb-5 flex gap-3"><Input aria-label="Buscar clientes" placeholder="Buscar local, persona o código" value={busqueda} onChange={e=>setBusqueda(e.target.value)}/><Button onClick={()=>setF(vacio)}><Plus/>Añadir local</Button></div>
+ {f && <form className="mb-8 grid gap-4 border-y border-border py-5 sm:grid-cols-2" onSubmit={e=>{e.preventDefault();guardar();}}><h2 className="text-xl font-bold sm:col-span-2">{f.id?"Editar cliente":"Nuevo cliente"}</h2>{([{key:"nombre",label:"Nombre local",max:200},{key:"persona",label:"Nombre persona",max:200},{key:"dni",label:"DNI",max:30},{key:"telefono",label:"Teléfono",max:40},{key:"email",label:"Correo electrónico",max:254},{key:"direccion",label:"Dirección",max:500}] as const).map(({key,label,max})=><div key={key}><Label htmlFor={`local-${key}`}>{label}</Label><Input id={`local-${key}`} required={key==="nombre"} maxLength={max} type={key==="email"?"email":key==="telefono"?"tel":"text"} value={f[key] ?? ""} onChange={e=>setF({...f,[key]:e.target.value})}/></div>)}<div className="flex gap-3 sm:col-span-2"><Button disabled={busy}>Guardar cambios</Button><Button type="button" variant="secondary" onClick={()=>setF(null)}>Cancelar</Button></div></form>}
+ <div className="grid gap-4 sm:grid-cols-2">{locales.filter(l=>`${l.nombre} ${l.persona} ${l.codigoCliente}`.toLowerCase().includes(busqueda.toLowerCase())).map(l=><article key={l.id} className="rounded-lg border border-border bg-card p-4"><div className="flex items-start justify-between gap-2"><div className="min-w-0"><h2 className="break-words text-xl font-bold">{l.nombre}</h2><p className="text-sm text-muted-foreground">Cliente {String(l.codigoCliente ?? "").padStart(4,"0")}</p></div><Button variant="ghost" size="icon" aria-label={`Editar ${l.nombre}`} title="Editar cliente" onClick={()=>setF(l)}><Pencil/></Button></div><p className="mt-3">{l.persona}{l.dni && ` · DNI: ${l.dni}`}</p><p className="text-sm">{l.direccion}</p><p className="break-words text-sm">{l.telefono} · {l.email}</p><Button className="my-3" size="sm" variant="secondary" onClick={()=>setQr(l)}><Printer/>Ficha y QR</Button><div className="flex flex-wrap gap-2">{[...new Set(decimos.filter(d=>d.ubicacion===l.id).map(d=>d.numero))].map(n=><span key={n} className="font-mono text-sm">{n} ×{decimos.filter(d=>d.ubicacion===l.id&&d.numero===n).reduce((s,d)=>s+d.cantidad,0)}</span>)}</div><h3 className="mt-4 font-semibold">Albaranes</h3>{albaranes.filter(a=>a.localId===l.id).map(a=><Link key={a.id} to="/albaran/$id" params={{id:a.id}} className="mt-2 flex flex-wrap justify-between gap-2 border-t border-border pt-2 text-sm"><span>{a.id}</span><span className={saldoAlbaran(a).pendiente?"text-destructive":"text-accent"}>{saldoAlbaran(a).texto} · {euros(saldoAlbaran(a).pendiente)}</span></Link>)}</article>)}</div></div>
+ {qr && <div role="dialog" aria-modal="true" aria-label="Ficha del cliente" className="fixed inset-0 z-40 overflow-y-auto bg-background p-6"><div className="mx-auto max-w-2xl"><div className="no-print mb-8 flex justify-between"><Button onClick={()=>window.print()}><Printer/>Imprimir ficha</Button><Button variant="ghost" aria-label="Cerrar ficha" onClick={()=>setQr(null)}><X/></Button></div><article className="print-sheet space-y-4">{config?.logo&&<img src={config.logo} alt="Logo de la administración" className="h-20 max-w-48 object-contain"/>}<h1 className="text-2xl font-bold">{qr.nombre}</h1><p>Cliente {String(qr.codigoCliente ?? "").padStart(4,"0")}</p><p>{qr.persona} · DNI: {qr.dni || "—"}</p><p>{qr.direccion}</p><p>{qr.telefono}</p><p>{qr.email}</p><QRCodeSVG value={qrCliente(qr)} size={240} level="M" marginSize={4} bgColor="white" fgColor="black"/></article></div></div>}
+ </>;
 }
