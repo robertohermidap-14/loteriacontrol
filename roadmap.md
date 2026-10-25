@@ -3,6 +3,9 @@
 - [x] Mostrar entregados/cobrados con filtros de fecha, cliente y número.
 - [x] Verificar lectura sin sesión, rechazo de enlace inválido, descarga PDF y filtros; envío final en WhatsApp no verificable desde el navegador de pruebas.
 - Segunda fase acordada: cuentas individuales para locales.
+- [x] Simplificar selección sin rangos, local → número → series y fracciones compactas.
+- [x] Agrupar albaranes y PDF, identificar comercial de entrega y compactar cobros con importe automático.
+- [x] Verificar con sesión selección de 19 décimos, número único, cobro agrupado de 20 € y PDF descargado; 31 pruebas pasan. No se registraron entregas ni cobros reales durante estas comprobaciones.
 - [x] Revisar Stock sin pendiente de cobro; seleccionar series con un toque desde Stock y Entregar, fracciones separadas y cantidad del albarán preparado comprobadas con sesión, sin modificar stock real.
 - [x] Mejorar enfoque/resolución y recuperación de permisos de cámara; lectura simulada 96458, 24 pruebas y pantallas móvil/tablet sin desbordamiento comprobadas. Cámara física pendiente de prueba en los dispositivos del equipo.
 - [x] Quitar pendiente de cobro de Stock y agrupar número → ubicación → series.

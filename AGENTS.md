@@ -22,7 +22,7 @@
 - Caja owns both balance and receipt-list views; /cobro redirects to its receipt view to preserve existing navigation.
 - Receipt DTOs carry administration branding and client contact fields through the capability-only RPC so anonymous PDF generation never reads internal configuration tables.
 - Long inventory detail lists use TanStack Virtual with measured rows to keep tablet scrolling bounded without losing controls.
-- Stock and assignment share a virtualized series selector; range edits are staged locally and persisted by one role-checked RPC. Atomic delivery locks source rows and creates its receipt in the same transaction.
+- Stock and assignment share a virtualized series selector; per-series state edits are staged locally and persisted by one role-checked RPC. Atomic delivery locks source rows and creates its receipt in the same transaction.
 - Read positive stock with stable paginated queries so API row limits cannot silently truncate large numbers; never infer individual fractions from legacy unspecified or textual ranges.
 - Camera scanner serializes startup/teardown, uses cross-browser decoding with native acceleration, applies optional autofocus/resolution constraints, and offers device selection plus direct-tab recovery for embedded permission failures.
 - Signed zero-money returns use the transactional settlement RPC and an idempotency audit table, never zero-value cash ledger rows; existing daily closure restrictions remain enforced.
@@ -31,3 +31,6 @@
 - Scan sales use the role-checked, idempotent vender_decimo RPC with a locked stock row; camera and keyboard readers share the same sale flow.
 - Local available stock reads remaining decimos quantities directly; settlement already removes paid and returned units, so displays must not subtract them again.
 - Paid-quantity edits derive the current collection from cumulative paid value minus money already received; cash input remains editable for partial monetary payments.
+
+- Compact receipt grouping is presentation-only; grouped settlement distributes deltas over unchanged source-row order to preserve transactional stock accounting.
+- Delivery identity is an immutable authenticated-profile snapshot set by a database trigger and included in the capability-only receipt projection, never inferred from the viewer.
