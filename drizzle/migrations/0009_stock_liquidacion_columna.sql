@@ -1,0 +1,1 @@
+DO $$ DECLARE definition text; BEGIN SELECT pg_get_functiondef('public.registrar_cobro(text,jsonb,numeric,text,text,uuid)'::regprocedure) INTO definition; definition:=replace(definition,'UPDATE public.decimos SET cantidad=cantidad-delta WHERE id=stock.id;','UPDATE public.decimos AS d SET cantidad=d.cantidad-delta WHERE d.id=stock.id;'); EXECUTE definition; END; $$;

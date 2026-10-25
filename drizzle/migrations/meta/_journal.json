@@ -64,6 +64,13 @@
       "when": 1792916785248,
       "tag": "0008_devoluciones_sin_cobro",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1792917095252,
+      "tag": "0009_stock_liquidacion_columna",
+      "breakpoints": true
     }
   ]
 }
