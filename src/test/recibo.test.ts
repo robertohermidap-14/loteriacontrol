@@ -1,3 +1,4 @@
+import { enlaceAlbaran, enlaceCopia } from "@/lib/enlaces";
 import { describe, expect, it } from "vitest";
 import { telefonoWhatsApp, filtrarAlbaranes, hashToken, type Recibo } from "@/lib/recibo";
 import type { Albaran } from "@/lib/store";
@@ -7,6 +8,7 @@ import { PDFDocument } from "pdf-lib";
 const a: Albaran = { id: "ALB-TEST", localId: "local-a", fecha: "2026-10-21T10:00:00Z", estado: "pendiente", total: 0, tipo: "deposito", receptorNombre: "Ana", receptorDni: "", firma: "", cobradoPor: "", firmaCobro: "", lineas: [{ numero: "96458", serie: "1", fraccion: "1", cantidad: 10, devueltos: 0, pagados: 10 }] };
 const f = { desde: "", hasta: "", localId: "", numero: "", estado: "" };
 describe("Copias y filtros de albaranes", () => {
+  it("QR y copias usan la aplicación publicada correcta",()=>{expect(enlaceAlbaran("MHL-0008-000015")).toBe("https://loteriacontrol.lovable.app/albaran/MHL-0008-000015");expect(enlaceCopia("a".repeat(64))).toBe("https://loteriacontrol.lovable.app/recibo/"+"a".repeat(64));});
   it("normaliza los teléfonos españoles y preserva el prefijo internacional", () => {
     expect(telefonoWhatsApp("612 345 678")).toBe("34612345678");
     expect(telefonoWhatsApp("00351 912345678")).toBe("351912345678");

@@ -8,6 +8,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { saldoAlbaran } from "@/lib/contabilidad";
 import { euros } from "@/lib/store";
 import { LOTERIAS } from "@/lib/loteria";
+import { enlaceAlbaran } from "@/lib/enlaces";
 
 export function ReciboCliente({ recibo: r, controles = true }: { recibo: Recibo; controles?: boolean }) {
   const [pdf, setPdf] = useState<Blob | null>(null);
@@ -32,7 +33,7 @@ export function ReciboCliente({ recibo: r, controles = true }: { recibo: Recibo;
         <p className="font-bold">{r.administracion?.nombre || EMPRESA}</p>
         <p>{r.administracion?.razon_social}</p><p>{r.administracion?.nif && `NIF: ${r.administracion.nif}`}</p><p>{r.administracion?.direccion}</p><p>{[r.administracion?.telefono,r.administracion?.email].filter(Boolean).join(" · ")}</p>
         <p className="my-3 font-semibold">{LOTERIAS.find(l=>l.id===(r.loteria ?? "navidad"))?.nombre}</p>
-        <div className="float-right ml-3"><QRCodeSVG value={r.cobroUrl ?? `https://pinpoint-code-slice.lovable.app/albaran/${r.id}`} size={100} bgColor="white" fgColor="black" /></div>
+        <div className="float-right ml-3 bg-card p-2"><QRCodeSVG value={r.cobroUrl ?? enlaceAlbaran(r.id)} size={120} marginSize={4} bgColor="white" fgColor="black" /></div>
         <h2 className="text-xl font-bold">{r.localNombre}</h2><p>Cliente {String(r.codigoCliente ?? "—").padStart(4,"0")}</p><p>{r.localDireccion}</p><p>{r.localTelefono}</p>
         <p>{r.localPersona}{r.localDni && ` · DNI: ${r.localDni}`}</p><p className="mb-3">{r.localEmail}</p>
         <h1 className="text-2xl font-bold">{paid ? "Recibo de cobro" : r.tipo === "deposito" ? "Albarán de depósito" : "Albarán de entrega"}</h1>

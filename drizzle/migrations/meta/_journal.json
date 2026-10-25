@@ -71,6 +71,20 @@
       "when": 1792917095252,
       "tag": "0009_stock_liquidacion_columna",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1792926747693,
+      "tag": "0010_venta_escaneo_atomica",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1792926759921,
+      "tag": "0011_auditoria_ventas_escaneo",
+      "breakpoints": true
     }
   ]
 }

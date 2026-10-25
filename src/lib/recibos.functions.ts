@@ -4,6 +4,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Database } from "@/integrations/supabase/types";
 import type { Recibo } from "@/lib/recibo";
+import { enlaceAlbaran } from "@/lib/enlaces";
 import { hashToken } from "@/lib/recibo";
 
 export const crearEnlaceRecibo = createServerFn({ method: "POST" })
@@ -36,5 +37,6 @@ export const leerRecibo = createServerFn({ method: "GET" })
     });
     const { data: receipt, error } = await client.rpc("leer_copia_albaran", { p_hash: await hashToken(data.token) });
     if (error) throw new Error("No se pudo consultar el albarán. Inténtalo de nuevo.");
-    return receipt as unknown as Recibo | null;
+    const r = receipt as unknown as Recibo | null;
+    return r ? {...r, cobroUrl: enlaceAlbaran(r.id)} : null;
   });

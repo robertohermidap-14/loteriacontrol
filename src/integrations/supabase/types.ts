@@ -434,6 +434,33 @@ export type Database = {
         }
         Relationships: []
       }
+      ventas_escaneo: {
+        Row: {
+          fecha: string
+          loteria: string
+          numero: string
+          resultado: Json
+          solicitud: string
+          usuario_id: string
+        }
+        Insert: {
+          fecha?: string
+          loteria: string
+          numero: string
+          resultado: Json
+          solicitud: string
+          usuario_id: string
+        }
+        Update: {
+          fecha?: string
+          loteria?: string
+          numero?: string
+          resultado?: Json
+          solicitud?: string
+          usuario_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -480,6 +507,10 @@ export type Database = {
           p_solicitud: string
         }
         Returns: undefined
+      }
+      vender_decimo: {
+        Args: { p_loteria: string; p_numero: string; p_solicitud: string }
+        Returns: Json
       }
     }
     Enums: {

@@ -4,6 +4,7 @@ import QRCode from "qrcode";
 import { saldoAlbaran } from "@/lib/contabilidad";
 import { EMPRESA } from "@/lib/sesion";
 import { LOTERIAS } from "@/lib/loteria";
+import { enlaceAlbaran } from "@/lib/enlaces";
 
 export async function generarPdf(r: Recibo): Promise<Blob> {
   const saldo = saldoAlbaran(r);
@@ -51,7 +52,7 @@ export async function generarPdf(r: Recibo): Promise<Blob> {
   if(r.localPersona || r.localDni)text(`Persona: ${r.localPersona || "—"} · DNI: ${r.localDni || "—"}`);
   if(r.localEmail)text(r.localEmail);
   if(y<180){page=pdf.addPage([595.28,841.89]);y=790;}
-  const qr = await pdf.embedPng(await QRCode.toDataURL(r.cobroUrl ?? `https://pinpoint-code-slice.lovable.app/albaran/${r.id}`,{margin:2,width:150}));
+  const qr = await pdf.embedPng(await QRCode.toDataURL(r.cobroUrl ?? enlaceAlbaran(r.id),{margin:4,width:300,errorCorrectionLevel:"M"}));
   page.drawImage(qr,{x:445,y: y-105,width:100,height:100}); y-=115;
   text(`Entrega: ${new Date(r.fecha).toLocaleString("es-ES")}`);
   y -= 10;

@@ -1,9 +1,10 @@
 import { saldoAlbaran } from "@/lib/contabilidad";
 import type { Albaran, Local } from "@/lib/store";
 import type { Config } from "@/lib/config";
+import { enlaceAlbaran } from "@/lib/enlaces";
 
 export type Recibo = Pick<Albaran, "id" | "fecha" | "estado" | "tipo" | "lineas" | "total" | "fechaPago" | "receptorNombre" | "firma" | "cobradoPor" | "firmaCobro" | "loteria"> & { administracion?: Config | null; localPersona?: string; localDni?: string; localEmail?: string; localNombre: string; localDireccion: string; localTelefono?: string | undefined; codigoCliente?: number | undefined; receptorDni?: string | undefined; cobroUrl?: string | undefined };
-export const reciboDeAlbaran = (a: Albaran, local?: Local, administracion?: Config | null): Recibo => ({ ...a, administracion:administracion ?? null, localPersona:local?.persona ?? "",localDni:local?.dni ?? "",localEmail:local?.email ?? "",localNombre: local?.nombre ?? "", localDireccion: local?.direccion ?? "", localTelefono: local?.telefono, codigoCliente: local?.codigoCliente, cobroUrl: `https://pinpoint-code-slice.lovable.app/albaran/${a.id}` });
+export const reciboDeAlbaran = (a: Albaran, local?: Local, administracion?: Config | null): Recibo => ({ ...a, administracion:administracion ?? null, localPersona:local?.persona ?? "",localDni:local?.dni ?? "",localEmail:local?.email ?? "",localNombre: local?.nombre ?? "", localDireccion: local?.direccion ?? "", localTelefono: local?.telefono, codigoCliente: local?.codigoCliente, cobroUrl: enlaceAlbaran(a.id) });
 
 export function telefonoWhatsApp(telefono: string) {
   let digits = telefono.replace(/\D/g, "");

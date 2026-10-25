@@ -17,7 +17,7 @@ export function Scanner({ onScan, qrOnly = false }: { onScan: (text: string) => 
       const formats = qrOnly ? [F.QR_CODE] : [F.QR_CODE, F.CODE_128, F.EAN_13, F.ITF, F.CODE_39, F.CODABAR, F.UPC_A];
       const s = new Html5Qrcode(id, { formatsToSupport: formats, verbose: false });
       try {
-        await s.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 280, height: qrOnly ? 280 : 140 } }, (text) => {
+        await s.start({ facingMode: "environment" }, { fps: 10, qrbox: (width, height) => ({ width: Math.min(280, width-24), height: Math.min(qrOnly ? 280 : 140, height-24) }) }, (text) => {
           const now = Date.now();
           if (text === last && now - lastT < 2500) return;
           last = text; lastT = now;
