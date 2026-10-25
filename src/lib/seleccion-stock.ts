@@ -2,6 +2,9 @@ import type { Decimo } from "@/lib/store";
 
 export type RangoStock = { desde: number; hasta: number; fracciones: string[]; estado: "recepcion" | "venta" };
 export type GrupoSerie = { serie: string; items: Decimo[] };
+export function serieSeleccionada(items: Decimo[], cantidades: Record<string, number>) {
+  return items.length > 0 && items.every(d => (cantidades[d.id] ?? 0) === d.cantidad);
+}
 export function agruparSeries(items: Decimo[]): GrupoSerie[] {
   const grupos = new Map<string, Decimo[]>();
   for (const item of items) if (item.cantidad > 0) grupos.set(item.serie, [...(grupos.get(item.serie) ?? []), item]);

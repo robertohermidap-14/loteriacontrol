@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Camera, CheckCircle2, Loader2, ScanBarcode } from "lucide-react";
 import { PageTitle } from "@/components/AppShell";
@@ -22,6 +22,8 @@ function Escaner(){
  const [busy,setBusy]=useState(false);
  const [ultima,setUltima]=useState<{numero:string;serie:string;fraccion:string}|null>(null);
  const lock=useRef(false);const input=useRef<HTMLInputElement>(null);
+ const visor=useRef<HTMLDivElement>(null);
+ useEffect(()=>{if(camara){input.current?.blur();visor.current?.scrollIntoView({block:"nearest"});}},[camara]);
  const stock=decimos.filter(d=>d.ubicacion===CENTRAL && d.estado==="venta").reduce((s,d)=>s+d.cantidad,0);
  async function procesar(code:string){
   if(lock.current || alta)return;
@@ -45,7 +47,7 @@ function Escaner(){
   </section>
   {busy && <p role="status" className="my-4 flex items-center gap-2"><Loader2 className="motion-safe:animate-spin"/>Registrando venta…</p>}
   {ultima && <div role="status" className="mt-5 flex items-center gap-4 border-l-4 border-accent bg-accent/10 p-4"><CheckCircle2 className="text-accent"/><div><p className="font-mono text-2xl font-bold">{ultima.numero}</p><p className="text-sm">Vendido · serie {ultima.serie || "—"} · fracción {ultima.fraccion || "sin detallar"}</p></div><span className="ml-auto text-sm font-semibold text-accent">Stock actualizado</span></div>}
-  {camara && <div className="mt-5 max-w-xl"><Scanner onScan={code=>void procesar(code)}/></div>}
+  {camara && <div ref={visor} className="mt-5 max-w-xl"><Scanner onScan={code=>void procesar(code)}/></div>}
   {alta && <EntradaForm numero={alta} onClose={()=>{setAlta(null);input.current?.focus()}}/>}
  </>;
 }
