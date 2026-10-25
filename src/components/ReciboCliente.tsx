@@ -7,6 +7,7 @@ import { EMPRESA } from "@/lib/sesion";
 import { QRCodeSVG } from "qrcode.react";
 import { saldoAlbaran } from "@/lib/contabilidad";
 import { euros } from "@/lib/store";
+import { LOTERIAS } from "@/lib/loteria";
 
 export function ReciboCliente({ recibo: r, controles = true }: { recibo: Recibo; controles?: boolean }) {
   const [pdf, setPdf] = useState<Blob | null>(null);
@@ -26,9 +27,13 @@ export function ReciboCliente({ recibo: r, controles = true }: { recibo: Recibo;
     {error && <p role="alert" className="no-print mb-4 text-destructive">{error}</p>}
     <article className="print-sheet space-y-6">
       <header className="border-b border-border pb-6">
+        {r.administracion?.logo && <img src={r.administracion.logo} alt="Logo de la administración" className="mb-4 h-20 max-w-48 object-contain"/>}
+        <p className="font-bold">{r.administracion?.nombre || EMPRESA}</p>
+        <p>{r.administracion?.razon_social}</p><p>{r.administracion?.nif && `NIF: ${r.administracion.nif}`}</p><p>{r.administracion?.direccion}</p><p>{[r.administracion?.telefono,r.administracion?.email].filter(Boolean).join(" · ")}</p>
+        <p className="my-3 font-semibold">{LOTERIAS.find(l=>l.id===(r.loteria ?? "navidad"))?.nombre}</p>
         <div className="float-right ml-3"><QRCodeSVG value={r.cobroUrl ?? `https://pinpoint-code-slice.lovable.app/albaran/${r.id}`} size={100} bgColor="white" fgColor="black" /></div>
         <h2 className="text-xl font-bold">{r.localNombre}</h2><p>Cliente {String(r.codigoCliente ?? "—").padStart(4,"0")}</p><p>{r.localDireccion}</p><p>{r.localTelefono}</p>
-        <p className="mb-3 font-semibold">{EMPRESA}</p>
+        <p>{r.localPersona}{r.localDni && ` · DNI: ${r.localDni}`}</p><p className="mb-3">{r.localEmail}</p>
         <h1 className="text-2xl font-bold">{paid ? "Recibo de cobro" : r.tipo === "deposito" ? "Albarán de depósito" : "Albarán de entrega"}</h1>
         <p className="mt-2 font-mono text-lg">{r.id}</p>
         <p className={`mt-4 text-2xl font-extrabold ${paid ? "text-accent" : "text-destructive"}`}>{saldo.texto}</p>

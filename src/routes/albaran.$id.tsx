@@ -12,13 +12,14 @@ import { crearEnlaceRecibo } from "@/lib/recibos.functions";
 import { reciboDeAlbaran, telefonoWhatsApp } from "@/lib/recibo";
 import { saldoAlbaran, type MetodoPago } from "@/lib/contabilidad";
 import { generarPdf } from "@/lib/recibo-pdf";
+import { useConfig } from "@/lib/config";
 export const Route = createFileRoute("/albaran/$id")({head:({params})=>({meta:[{title:`Albarán ${params.id} · Gestión Lotería`},{name:"description",content:"Entrega, cobros parciales y saldo pendiente del cliente."},{property:"og:title",content:`Albarán ${params.id} · Gestión Lotería`},{property:"og:description",content:"Entrega y liquidación de décimos por serie y fracción."},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary"},{name:"robots",content:"noindex"}]}),component:AlbaranPage});
 function AlbaranPage(){
- const {id}=Route.useParams(); const {albaranes,locales,pagos}=useStore(); const sesion=useSesion(); const a=albaranes.find(x=>x.id===id); const local=locales.find(l=>l.id===a?.localId);
+ const {id}=Route.useParams(); const {albaranes,locales,pagos}=useStore(); const config=useConfig(); const sesion=useSesion(); const a=albaranes.find(x=>x.id===id); const local=locales.find(l=>l.id===a?.localId);
  const [lineas,setLineas]=useState<Linea[]>([]);const [cobrando,setCobrando]=useState(false); const [firma,setFirma]=useState("");const [importe,setImporte]=useState("");const [metodo,setMetodo]=useState<MetodoPago>("efectivo");const [busy,setBusy]=useState(false); const [solicitud,setSolicitud]=useState("");
  useEffect(()=>{if(a) setLineas(a.lineas)},[a]);
  if(!a)return <p>Albarán no encontrado.</p>;
- const saldo=saldoAlbaran(a);const recibo=reciboDeAlbaran(a,local);
+ const saldo=saldoAlbaran(a);const recibo=reciboDeAlbaran(a,local,config);
  const upd=(i:number,k:"pagados"|"devueltos",v:number)=>setLineas(prev=>prev.map((l,j)=>j===i?{...l,[k]:Math.max(a.lineas[i]?.[k] ?? 0,Math.min(l.cantidad-l[k==="pagados"?"devueltos":"pagados"],Math.trunc(v)))}:l));
  const cobrar=async()=>{setBusy(true);try{await actions.liquidar(a.id,lineas,{cobradoPor:nombreCobrador(sesion),firmaCobro:firma,importe:Number(importe),metodo,solicitud});setCobrando(false);setFirma("");toast.success("Cobro registrado");}catch(err){toast.error(err instanceof Error?err.message:"No se pudo cobrar");}finally{setBusy(false)}};
  const wa=async()=>{let tel:string;try{tel=telefonoWhatsApp(local?.telefono ?? "")}catch(err){toast.error(err instanceof Error?err.message:"Teléfono inválido");return}const tab=window.open("about:blank","_blank");if(tab)tab.opener=null;setBusy(true);try{const {token}=await crearEnlaceRecibo({data:{id:a.id}});const txt=[`*${a.id} · ${saldo.texto}*`,EMPRESA,`Cliente: ${local?.nombre}`,`Cobrado: ${euros(a.total)}`,`Pendiente: ${euros(saldo.pendiente)}`,`Ver, descargar o imprimir: https://pinpoint-code-slice.lovable.app/recibo/${token}`].join("\n");const url=`https://wa.me/${tel}?text=${encodeURIComponent(txt)}`;if(tab)tab.location.href=url;else window.location.assign(url)}catch(err){tab?.close();toast.error(err instanceof Error?err.message:"No se pudo enviar")}finally{setBusy(false)}};
