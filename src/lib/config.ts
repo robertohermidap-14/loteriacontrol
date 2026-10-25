@@ -10,7 +10,8 @@ const subs = new Set<(c: Config) => void>();
 async function cargar() {
   const { data } = await supabase.from("configuracion").select("nombre,razon_social,nif,direccion,telefono,email,logo").eq("id", 1).maybeSingle();
   cache = data ?? vacia;
-  subs.forEach((s) => s(cache!));
+  const config=cache;
+  subs.forEach((s) => s(config));
 }
 
 /** Datos de la administración (logo y facturación), compartidos por todo el equipo. */

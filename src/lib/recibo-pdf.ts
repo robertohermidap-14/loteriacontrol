@@ -3,6 +3,7 @@ import type { Recibo } from "@/lib/recibo";
 import QRCode from "qrcode";
 import { saldoAlbaran } from "@/lib/contabilidad";
 import { EMPRESA } from "@/lib/sesion";
+import { LOTERIAS } from "@/lib/loteria";
 
 export async function generarPdf(r: Recibo): Promise<Blob> {
   const saldo = saldoAlbaran(r);
@@ -28,12 +29,28 @@ export async function generarPdf(r: Recibo): Promise<Blob> {
     draw();
   };
   const money = (n: number) => `${n.toFixed(2)} EUR`;
-  text(EMPRESA, 12, true);
+  const config=r.administracion;
+  if(config?.logo){
+    const source=config.logo;
+    if(!/^data:image\/(png|jpeg);base64,/i.test(source)) throw new Error("Logo no compatible: utiliza PNG o JPG");
+    const image=source.startsWith("data:image/png")?await pdf.embedPng(source):await pdf.embedJpg(source);
+    const scale=Math.min(130/image.width,65/image.height);
+    page.drawImage(image,{x:40,y:y-image.height*scale,width:image.width*scale,height:image.height*scale});y-=image.height*scale+15;
+  }
+  text(config?.nombre || EMPRESA, 12, true);
+  if(config?.razon_social)text(config.razon_social);
+  if(config?.nif)text(`NIF: ${config.nif}`);
+  if(config?.direccion)text(config.direccion);
+  if(config?.telefono || config?.email)text([config.telefono,config.email].filter(Boolean).join(" · "));
+  text(LOTERIAS.find(l=>l.id===(r.loteria ?? "navidad"))?.nombre ?? "Lotería de Navidad",12,true);
   text(`${r.estado === "pagado" ? "RECIBO DE COBRO" : r.tipo === "deposito" ? "ALBARÁN DE DEPÓSITO" : "ALBARÁN DE ENTREGA"} · ${r.id}`, 17, true);
   text(saldo.texto, 20, true, saldo.estado!=="pagado");
   text(`Local: ${r.localNombre}`, 13, true);
   text(r.localDireccion);
   text(`Cliente: ${r.codigoCliente ?? "—"} · Teléfono: ${r.localTelefono ?? "—"}`);
+  if(r.localPersona || r.localDni)text(`Persona: ${r.localPersona || "—"} · DNI: ${r.localDni || "—"}`);
+  if(r.localEmail)text(r.localEmail);
+  if(y<180){page=pdf.addPage([595.28,841.89]);y=790;}
   const qr = await pdf.embedPng(await QRCode.toDataURL(r.cobroUrl ?? `https://pinpoint-code-slice.lovable.app/albaran/${r.id}`,{margin:2,width:150}));
   page.drawImage(qr,{x:445,y: y-105,width:100,height:100}); y-=115;
   text(`Entrega: ${new Date(r.fecha).toLocaleString("es-ES")}`);

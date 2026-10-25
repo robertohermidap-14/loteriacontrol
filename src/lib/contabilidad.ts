@@ -1,5 +1,5 @@
 export type MetodoPago = "efectivo" | "tarjeta" | "bizum";
-export type PagoCaja = { id: string; albaran_id: string; usuario_id: string | null; importe: number; metodo: string; fecha: string; nombre: string; historico: boolean };
+export type PagoCaja = { loteria?: string; id: string; albaran_id: string; usuario_id: string | null; importe: number; metodo: string; fecha: string; nombre: string; historico: boolean };
 export type SaldoDocumento = { total: number; lineas: { cantidad: number; devueltos: number }[] };
 export function saldoAlbaran(a: SaldoDocumento) {
   const entregado = a.lineas.reduce((s, l) => s + l.cantidad * 20, 0);

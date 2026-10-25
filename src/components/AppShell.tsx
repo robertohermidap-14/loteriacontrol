@@ -4,6 +4,8 @@ import type { ReactNode } from "react";
 import { AuthGate, salir } from "@/components/AuthGate";
 import { useSesion } from "@/lib/sesion";
 import { useConfig } from "@/lib/config";
+import { Button } from "@/components/ui/button";
+import { LOTERIAS, seleccionarLoteria, useLoteria } from "@/lib/loteria";
 
 const nav = [
   { to: "/", label: "Terminaciones", icon: Grid3x3 },
@@ -11,7 +13,6 @@ const nav = [
   { to: "/inventario", label: "Inventario", icon: Package },
   { to: "/locales", label: "Locales", icon: Store },
   { to: "/asignar", label: "Asignar", icon: Truck },
-  { to: "/cobro", label: "Cobro", icon: Wallet },
   { to: "/caja", label: "Caja", icon: Wallet },
 ];
 
@@ -22,6 +23,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 function Shell({ children }: { children: ReactNode }) {
   const sesion = useSesion();
   const config = useConfig();
+  const loteria=useLoteria();
   const items = sesion.esAdmin ? [...nav, { to: "/usuarios", label: "Admin", icon: Users }] : nav;
   return (
     <>
@@ -32,11 +34,11 @@ function Shell({ children }: { children: ReactNode }) {
             ? <img src={config.logo} alt="Logo" className="h-9 w-9 shrink-0 rounded-lg object-contain" />
             : <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary font-mono text-lg font-bold text-primary-foreground">L</div>}
           <span className="flex-1 truncate font-semibold tracking-tight">{config?.nombre || "Gestión Lotería"}</span>
-          <button onClick={salir} className="shrink-0 text-sm text-muted-foreground hover:text-foreground">Salir</button>
+          <Button variant="ghost" onClick={()=>{seleccionarLoteria(null);salir();}}>Salir</Button>
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-4 py-6">{children}</main>
-      <nav className="no-print fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card">
+      <main className="mx-auto max-w-6xl px-4 py-6">{loteria ? <><div className="no-print mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4"><p className="text-lg font-semibold">{LOTERIAS.find(l=>l.id===loteria)?.nombre}</p><Button variant="secondary" onClick={()=>seleccionarLoteria(null)}>Cambiar lotería</Button></div><div key={loteria}>{children}</div></> : <section className="py-8"><h1 className="mb-8 text-3xl font-bold">Seleccionar lotería</h1><div className="grid gap-4 sm:grid-cols-3">{LOTERIAS.map(l=><Button key={l.id} variant="secondary" className="h-32 whitespace-normal text-xl" onClick={()=>seleccionarLoteria(l.id)}>{l.nombre}</Button>)}</div></section>}</main>
+      {loteria && <nav className="no-print fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card">
         <div className="mx-auto grid max-w-6xl" style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}>
           {items.map(({ to, label, icon: Icon }) => (
             <Link key={to} to={to} activeOptions={{ exact: to === "/" }}
@@ -46,7 +48,7 @@ function Shell({ children }: { children: ReactNode }) {
             </Link>
           ))}
         </div>
-      </nav>
+      </nav>}
     </div>
     </>
   );
