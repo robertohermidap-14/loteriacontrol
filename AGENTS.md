@@ -18,3 +18,6 @@
 - Receipt balances derive from delivered quantities minus returns and cumulative money received; new receipt numbers are assigned by a database sequence scoped by stable customer codes, preserving existing IDs and links.
 - New stock entries represent explicit fractions as individual rows so complete series and loose tickets share the same assignment flow; legacy unspecified fractions remain unmodified.
 - Cash ledger and closure RLS restrict commercial reads to their own Madrid-calendar day; administrators can read all periods. Shared operational receipt reads remain team-visible.
+- Lottery selection partitions operational stock, receipts, payments and closures while client identities stay shared; payment classification derives from the receipt and closure totals are lottery-scoped.
+- Caja owns both balance and receipt-list views; /cobro redirects to its receipt view to preserve existing navigation.
+- Receipt DTOs carry administration branding and client contact fields through the capability-only RPC so anonymous PDF generation never reads internal configuration tables.
